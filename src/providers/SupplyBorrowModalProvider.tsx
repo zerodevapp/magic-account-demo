@@ -14,6 +14,7 @@ interface SupplyBorrowModalContextType {
   isOpen: boolean;
   openModal: (props: SupplyBorrowModalProps) => void;
   closeModal: () => void;
+  refreshSavings: () => void;
 }
 
 interface SupplyBorrowModalProps {
@@ -54,11 +55,16 @@ export const SupplyBorrowModalProvider: React.FC<{
     },
   });
   const status = callsStatus?.status;
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const refreshSavings = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   useEffect(() => {
     if (status === "CONFIRMED") {
       refetchCallsStatus();
       setTransferPending(false);
+      setRefreshTrigger(prev => prev + 1); 
       // notifications.show({
       //   color: "green",
       //   message: "Successfully transfer 0.01 ETH to your eoa",
@@ -123,7 +129,7 @@ export const SupplyBorrowModalProvider: React.FC<{
 
   return (
     <SupplyBorrowModalContext.Provider
-      value={{ isOpen, openModal, closeModal }}
+      value={{ isOpen, openModal, closeModal, refreshSavings }}
     >
       {children}
       <Modal open={isOpen} handleClose={closeModal} showPoweredBy={false}>
