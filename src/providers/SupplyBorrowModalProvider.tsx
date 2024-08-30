@@ -55,7 +55,7 @@ export const SupplyBorrowModalProvider: React.FC<{
     },
   });
   const status = callsStatus?.status;
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [, setRefreshTrigger] = useState(0);
   const refreshSavings = () => {
     setRefreshTrigger(prev => prev + 1);
   };
