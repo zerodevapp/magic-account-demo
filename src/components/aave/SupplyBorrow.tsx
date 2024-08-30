@@ -1,0 +1,410 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { Transition } from "@headlessui/react";
+import ArbitrumIcon from "../../assets/networks/arbitrum.svg";
+import OptimismIcon from "../../assets/networks/optimism.svg";
+import PolygonIcon from "../../assets/networks/polygon.svg";
+import BaseIcon from "../../assets/networks/base.svg";
+import {
+  AaveV3YieldService,
+  YieldInfo,
+} from "../../services/AaveV3YieldService";
+
+interface SupplyBorrowModalProps {
+  isVisible: boolean;
+  transferPending: boolean;
+  tokenSymbol: string;
+  tokenAddress: string;
+  apy: number;
+  chainName: string;
+  chainId: number;
+  marketAddress: string;
+  balances: {
+    usdc: string;
+    usdt: string;
+  };
+  onClose: () => void;
+  onSubmit: (data: any) => void;
+}
+
+const SupplyBorrowModal: React.FC<SupplyBorrowModalProps> = ({
+  isVisible,
+  transferPending,
+  tokenSymbol,
+  tokenAddress,
+  apy,
+  chainName,
+  chainId,
+  marketAddress,
+  balances,
+  onClose,
+  onSubmit,
+}) => {
+  const { register, handleSubmit, setValue, watch } = useForm();
+  const [selectedChain, setSelectedChain] = useState({
+    name: "Polygon",
+    id: 137,
+  });
+  const [maxBalance, setMaxBalance] = useState("0");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+  const amount = watch("amount");
+  const [yieldInfo, setYieldInfo] = useState<YieldInfo[]>([]);
+  const [currentYield, setCurrentYield] = useState<number>(apy);
+  const aaveV3YieldService = new AaveV3YieldService();
+
+  useEffect(() => {
+    // Set default values when the component loads
+    setValue("chainId", chainId);
+    setValue("chainName", chainName);
+    setValue("tokenAddress", tokenAddress);
+    setValue("marketAddress", marketAddress);
+    setCurrentYield(apy);
+  }, [chainId, chainName, tokenAddress, marketAddress, apy, setValue]);
+
+  useEffect(() => {
+    const result =
+      tokenSymbol === "USDC"
+        ? parseFloat(balances.usdc)
+        : parseFloat(balances.usdt);
+    if (result === 0) {
+      setMaxBalance("0");
+    } else {
+      const buffer = 0.1;
+      const reducedResult = result - buffer;
+      setMaxBalance(reducedResult <= 0 ? "0" : reducedResult.toFixed(2));
+    }
+  }, [balances, tokenSymbol]);
+
+  const chains = [
+    { id: 42161, name: "Arbitrum" },
+    { id: 137, name: "Polygon" },
+    { id: 10, name: "Optimism" },
+    { id: 8453, name: "Base" },
+  ];
+
+  const getChainIcon = (chainId: number) => {
+    switch (chainId) {
+      case 42161:
+        return ArbitrumIcon;
+      case 137:
+        return PolygonIcon;
+      case 10:
+        return OptimismIcon;
+      case 8453:
+        return BaseIcon;
+      default:
+        return null;
+    }
+  };
+
+  useEffect(() => {
+    fetchYieldInfo();
+  }, []);
+
+  const fetchYieldInfo = async () => {
+    try {
+      const info = await aaveV3YieldService.getYieldInfoForSymbol("USDC");
+      setYieldInfo(info);
+    } catch (error) {
+      console.error("Error fetching yield info:", error);
+    }
+  };
+
+  const setNewChain = (id: number) => {
+    const selected = chains.find((chain) => chain.id === id);
+    if (selected) {
+      setSelectedChain({ name: selected.name, id: selected.id });
+      const newYieldInfo = yieldInfo.find((info) => info.chainId === id);
+      if (newYieldInfo) {
+        setCurrentYield(newYieldInfo.supplyYield);
+        setValue("chainId", id);
+        setValue("chainName", selected.name);
+        setValue("tokenAddress", newYieldInfo.tokenAddress);
+        setValue("marketAddress", newYieldInfo.marketAddress);
+      }
+    }
+    toggleDropdown();
+  };
+
+  const setMaxAvailable = () => {
+    setValue("amount", maxBalance);
+  };
+
+  const handleFormSubmit = (data: any) => {
+    onSubmit(data);
+  };
+
+  if (!isVisible) return null;
+
+  return (
+    <>
+      {/* <div className="bg-white rounded-lg border max-w-lg w-full p-10 space-y-4"> */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-gray-900 flex items-center space-x-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-8 w-8 text-indigo-800"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+            />
+          </svg>
+          <span className="mt-1">Save {tokenSymbol}</span>
+        </h2>
+      </div>
+
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+        <input type="hidden" {...register("chainId")} />
+        <input type="hidden" {...register("chainName")} />
+        <div>
+          <label
+            htmlFor="amount"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Amount to put into savings
+          </label>
+          <div className="relative border rounded-md grid grid-cols-12 mt-1">
+            <input
+              // type="number"
+              id="amount"
+              {...register("amount", {
+                required: true,
+                min: 0,
+                max: parseFloat(maxBalance),
+                valueAsNumber: true,
+                validate: (value) => {
+                  const numValue = parseFloat(value);
+                  return !isNaN(numValue) && numValue <= parseFloat(maxBalance);
+                },
+              })}
+              className="block py-3 px-4 border-gray-100 rounded-md text-lg outline-none sm:text-sm col-span-10 font-semibold"
+              placeholder="0.00"
+            />
+            <div className="absolute border-l pl-4 inset-y-0 col-span-2 right-0 pr-3 flex items-center pointer-events-none">
+              <span className="text-gray-500 sm:text-sm">{tokenSymbol}</span>
+            </div>
+          </div>
+          <div className="mt-2 w-full flex justify-end text-xs text-slate-600 font-normal">
+            <div
+              onClick={setMaxAvailable}
+              className="underline cursor-pointer mr-1"
+            >
+              Max available
+            </div>
+            ({maxBalance})
+          </div>
+          <div className="mt-2 py-3 bg-indigo-50 font-light text-xs px-4 gap-x-4 flex flex-row items-center text-indigo-700 rounded-md">
+            <div className="p-2 bg-indigo-500 font-semibold text-white rounded-sm">
+              i
+            </div>
+            <div>
+              Max available amount is smaller than your balance to account for
+              transaction costs.
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gray-50 grid grid-cols-2 rounded p-6 text-slate-700 gap-x-4 gap-y-10 text-sm">
+          <div className="flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 mr-2 text-green-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+            </svg>
+            <div className="flex flex-col">
+              <span className="font-semibold text-xs text-slate-600">
+                Savings APY
+              </span>
+              <span className="text-green-600 font-semibold">
+                {(currentYield * 100).toFixed(2)}%
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-2 text-blue-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              />
+            </svg>
+            <div className="flex flex-col">
+              <span className="font-semibold text-xs text-slate-600">
+                Token
+              </span>
+              <span className="font-mono">{tokenSymbol}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="w-full">
+          <div className="relative">
+            <div
+              onClick={toggleDropdown}
+              className="w-full flex flex-row items-center gap-x-2 text-sm justify-between cursor-pointer"
+            >
+              <div className="flex items-center">
+                <img
+                  src={getChainIcon(selectedChain.id) ?? ""}
+                  alt={selectedChain.name}
+                  className="h-6 w-6 mr-2"
+                />
+                <div className="flex flex-col">
+                  <span className="font-semibold text-xs text-slate-600">
+                    Supplying to pool:
+                  </span>
+                  <span>
+                    {selectedChain.name} (ID: {selectedChain.id})
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-row items-center px-4 text-sm py-3 bg-slate-50 hover:bg-slate-100 rounded-md justify-end gap-x-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-arrow-down-up h-5 w-5"
+                >
+                  <path d="m3 16 4 4 4-4" />
+                  <path d="M7 20V4" />
+                  <path d="m21 8-4-4-4 4" />
+                  <path d="M17 4v16" />
+                </svg>
+              </div>
+            </div>
+
+            <Transition
+              show={isDropdownOpen}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <div className="absolute right-0 z-10 mt-2 w-full origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div className="py-1">
+                  {chains.map((chain) => (
+                    <div
+                      key={chain.id}
+                      onClick={() => setNewChain(chain.id)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                    >
+                      {chain.name} (ID: {chain.id})
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Transition>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 items-center justify-end space-x-3 pt-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="button-secondary flex items-center justify-center"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={3}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+            <div className="mt-[0.1rem]">Cancel</div>
+          </button>
+          <button
+            type="submit"
+            disabled={!amount || transferPending}
+            className="button-primary flex items-center justify-center"
+          >
+            {transferPending ? (
+              <svg
+                className="animate-spin h-5 w-5 mr-2 text-indigo-200"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={3}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            )}
+            <div className="mt-[0.1rem]">
+              {transferPending ? "Processing" : "Confirm"}
+            </div>
+          </button>
+        </div>
+      </form>
+      {/* </div> */}
+    </>
+  );
+};
+
+export default SupplyBorrowModal;

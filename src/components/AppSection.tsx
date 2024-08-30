@@ -1,7 +1,9 @@
 import { useState } from "react";
-import UsdcSaveBorrow from "./UsdcSaveBorrow";
+import UsdcSaveBorrow from "./aave/UsdcSaveBorrow";
+import MySavings from "./aave/MySavings";
 import aaveLogo from "../assets/aave-logo.png";
 import uniswapLogo from "../assets/uniswap-logo.png";
+import AAVE from "./aave/AAVE";
 
 const tabs = [
   { name: "AAVE", icon: aaveLogo, current: true },
@@ -64,7 +66,7 @@ function AppSection() {
         </div>
       </div>
       <div className="mt-4">
-        {currentTab === "AAVE" && <UsdcSaveBorrow />}
+        {currentTab === "AAVE" && <AAVE />}
         {currentTab === "Uniswap" && <div>Uniswap content coming soon...</div>}
       </div>
     </div>

@@ -1,20 +1,20 @@
-import * as React from 'react';
-import Backdrop from '@mui/material/Backdrop';
-import { IconButton, Typography } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import Box from '@mui/material/Box';
-import MuiModal from '@mui/material/Modal';
-import Fade from '@mui/material/Fade';
+import * as React from "react";
+import Backdrop from "@mui/material/Backdrop";
+import { IconButton, Typography } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import Box from "@mui/material/Box";
+import MuiModal from "@mui/material/Modal";
+import Fade from "@mui/material/Fade";
 
 const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
   width: 400,
-  bgcolor: 'background.paper',
-  border: 'none',
-  borderRadius: '16px',
+  bgcolor: "background.paper",
+  border: "none",
+  borderRadius: "16px",
   boxShadow: 24,
   p: 4,
   pt: 6,
@@ -25,9 +25,15 @@ type Props = {
   children: React.ReactNode;
   open: boolean;
   handleClose: () => void;
+  showPoweredBy?: boolean;
 };
 
-export default function Modal({ children, open, handleClose }: Props) {
+export default function Modal({
+  children,
+  open,
+  handleClose,
+  showPoweredBy = true,
+}: Props) {
   return (
     <MuiModal
       aria-labelledby="transition-modal-title"
@@ -46,26 +52,28 @@ export default function Modal({ children, open, handleClose }: Props) {
         <Box sx={style}>
           <IconButton
             onClick={handleClose}
-            sx={{ position: 'absolute', right: 8, top: 8 }}
+            sx={{ position: "absolute", right: 8, top: 8 }}
           >
             <CloseIcon />
           </IconButton>
           {children}
-          <Typography
-            variant="caption"
-            display="block"
-            sx={{
-              position: 'absolute',
-              left: '50%',
-              bottom: 10,
-              transform: 'translateX(-50%)',
-              color: 'black',
-              width: '100%',
-              textAlign: 'center',
-            }}
-          >
-            Powered by ZeroDev
-          </Typography>
+          {showPoweredBy && (
+            <Typography
+              variant="caption"
+              display="block"
+              sx={{
+                position: "absolute",
+                left: "50%",
+                bottom: 10,
+                transform: "translateX(-50%)",
+                color: "black",
+                width: "100%",
+                textAlign: "center",
+              }}
+            >
+              Powered by ZeroDev
+            </Typography>
+          )}
         </Box>
       </Fade>
     </MuiModal>
