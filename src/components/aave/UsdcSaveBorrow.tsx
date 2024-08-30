@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
-  AaveV3YieldService,
   YieldInfo,
 } from "../../services/AaveV3YieldService";
 import usdcLogo from "../../assets/usdc.png";

@@ -109,7 +109,7 @@ export class AaveGetSuppliesService {
   }
 
   encodeAaveWithdrawalData(
-    chainId: number,
+    _chainId: number,
     assetAddress: Address,
     amount: bigint,
     userAddress: Address

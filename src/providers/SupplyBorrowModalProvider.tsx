@@ -130,7 +130,6 @@ export const SupplyBorrowModalProvider: React.FC<{
         {modalProps && (
           <SupplyBorrowModal
             isVisible={isOpen}
-            actionType={modalProps.actionType}
             tokenSymbol={modalProps.tokenSymbol}
             tokenAddress={modalProps.tokenAddress}
             apy={modalProps.apy}

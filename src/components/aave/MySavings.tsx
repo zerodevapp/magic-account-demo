@@ -94,7 +94,7 @@ const MySavings: React.FC = () => {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const openWithdraw = async (position: Position) => {
+  const openWithdraw = async (_position: Position) => {
     if (!address) return;
     alert("Withdraw not implemented");
     // const amount = parseUnits(position.amount, 6);

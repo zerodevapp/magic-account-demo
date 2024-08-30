@@ -1,6 +1,4 @@
 import { useState } from "react";
-import UsdcSaveBorrow from "./aave/UsdcSaveBorrow";
-import MySavings from "./aave/MySavings";
 import aaveLogo from "../assets/aave-logo.png";
 import uniswapLogo from "../assets/uniswap-logo.png";
 import AAVE from "./aave/AAVE";
