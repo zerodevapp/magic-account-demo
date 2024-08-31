@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useConnect } from "wagmi";
-import GoogleIcon from "./GoogleIcon";
+// import GoogleIcon from "./GoogleIcon";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import PasskeyLogin from "./PasskeyLogin";
 
@@ -8,28 +8,28 @@ export default function LoginOptions() {
   const [showPasskeyLogin, setShowPasskeyLogin] = useState(false);
   const { connectors, connect, isPending } = useConnect();
 
-  const handleGoogleLogin = () => {
-    const googleConnector = connectors.find(
-      (connector) => connector.name === "Google"
-    );
-    if (googleConnector) {
-      connect({ connector: googleConnector });
-    } else {
-      console.error("Google connector not found");
-    }
-  };
+  // const handleGoogleLogin = () => {
+  //   const googleConnector = connectors.find(
+  //     (connector) => connector.name === "Google"
+  //   );
+  //   if (googleConnector) {
+  //     connect({ connector: googleConnector });
+  //   } else {
+  //     console.error("Google connector not found");
+  //   }
+  // };
 
   return (
     <div className="flex flex-col items-center w-full space-y-4">
       {!showPasskeyLogin && (
         <div className="w-full flex flex-col gap-2">
-          <LoginButton
+          {/* <LoginButton
             icon={<GoogleIcon />}
             text="Google"
             iconColor="text-black"
             onClick={handleGoogleLogin}
             disabled={isPending}
-          />
+          /> */}
           <LoginButton
             icon={<FingerprintIcon />}
             text="Sign in with Passkey"
@@ -37,6 +37,13 @@ export default function LoginOptions() {
             onClick={() => {
               setShowPasskeyLogin(true);
             }}
+          />
+          <LoginButton
+            icon={<FingerprintIcon />}
+            text="Connect with MetaMask"
+            iconColor="text-orange-500"
+            onClick={() => connect({ connector: connectors.find(connector => connector.name === 'Injected')! })}
+            disabled={isPending}
           />
         </div>
       )}
