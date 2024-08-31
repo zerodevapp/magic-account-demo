@@ -2,8 +2,9 @@ import { AuthModalProvider } from "./providers/AuthModalProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode } from "react";
 import { WagmiProvider, createConfig, http } from "wagmi";
+import { injected } from "wagmi/connectors";
 import { polygon, arbitrum, base, optimism } from "wagmi/chains";
-import { passkeyConnector, googleConnector } from "@magic-account/wagmi";
+import { passkeyConnector, wrapEOAConnector } from "@magic-account/wagmi";
 import { SupplyBorrowModalProvider } from "./providers/SupplyBorrowModalProvider";
 
 export default function Providers({ children }: { children: ReactNode }) {
@@ -15,7 +16,7 @@ export default function Providers({ children }: { children: ReactNode }) {
       [arbitrum.id]: http(),
       [polygon.id]: http(),
     },
-    connectors: [passkeyConnector(), googleConnector()],
+    connectors: [passkeyConnector(), wrapEOAConnector(injected())],
     multiInjectedProviderDiscovery: false,
   });
   const queryClient = new QueryClient();
