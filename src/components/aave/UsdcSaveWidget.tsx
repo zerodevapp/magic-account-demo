@@ -32,10 +32,6 @@ function UsdcSaveWidget({ usdcYields }: UsdcSaveModalProps) {
     }
   };
 
-  if (!usdcYields) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div className="bg-white py-8 sm:py-8 rounded-3xl shadow-md">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -44,11 +40,11 @@ function UsdcSaveWidget({ usdcYields }: UsdcSaveModalProps) {
             <div className="flex items-center justify-center mb-4">
               <img src={usdcLogo} alt="USDC Logo" className="w-10 h-10 mr-3" />
               <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                USDC Save/Borrow
+                USDC Supply Markets
               </h2>
             </div>
             <p className="mt-2 text-lg leading-8 text-gray-600">
-              Compare savings rates across different chains
+              Compare APYs across different chains
             </p>
           </div>
           <dl className="mt-4 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center sm:grid-cols-2 lg:grid-cols-4">
@@ -105,7 +101,7 @@ function UsdcSaveWidget({ usdcYields }: UsdcSaveModalProps) {
                   clipRule="evenodd"
                 />
               </svg>
-              Save
+              Supply
             </button>
           </div>
         </div>
