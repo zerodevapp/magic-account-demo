@@ -2,12 +2,9 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Transition } from "@headlessui/react";
 import { tokens, getChainIcon } from "../../utils/utils";
-import {
-  AaveV3YieldService,
-  YieldInfo,
-} from "../../services/AaveV3YieldService";
+import { useAaveYieldInfo } from "../../hooks/useAaveYieldInfo";
 import Alert from "./Alert";
-
+import { chains } from "../../utils/utils";
 interface UsdcSaveModalProps {
   isVisible: boolean;
   transferPending: boolean;
@@ -40,6 +37,7 @@ function UsdcSaveModal({
   onSubmit,
 }: UsdcSaveModalProps) {
   const { register, handleSubmit, setValue, watch } = useForm();
+  const { data: yieldInfo } = useAaveYieldInfo(tokenSymbol as 'USDC');
   const [selectedChain, setSelectedChain] = useState({
     name: chainName,
     id: chainId,
@@ -50,9 +48,7 @@ function UsdcSaveModal({
     setIsDropdownOpen(!isDropdownOpen);
   };
   const amount = watch("amount");
-  const [yieldInfo, setYieldInfo] = useState<YieldInfo[]>([]);
   const [currentYield, setCurrentYield] = useState<number>(apy);
-  const aaveV3YieldService = new AaveV3YieldService();
 
   useEffect(() => {
     // Set default values when the component loads
@@ -77,31 +73,11 @@ function UsdcSaveModal({
     }
   }, [balances, tokenSymbol]);
 
-  const chains = [
-    { id: 42161, name: "Arbitrum" },
-    { id: 137, name: "Polygon" },
-    { id: 10, name: "Optimism" },
-    { id: 8453, name: "Base" },
-  ];
-
-  useEffect(() => {
-    fetchYieldInfo();
-  }, []);
-
-  const fetchYieldInfo = async () => {
-    try {
-      const info = await aaveV3YieldService.getYieldInfoForSymbol("USDC");
-      setYieldInfo(info);
-    } catch (error) {
-      console.error("Error fetching yield info:", error);
-    }
-  };
-
   const setNewChain = (id: number) => {
     const selected = chains.find((chain) => chain.id === id);
     if (selected) {
       setSelectedChain({ name: selected.name, id: selected.id });
-      const newYieldInfo = yieldInfo.find((info) => info.chainId === id);
+      const newYieldInfo = yieldInfo?.find((info) => info.chainId === id);
       if (newYieldInfo) {
         setCurrentYield(newYieldInfo.supplyYield);
         setValue("chainId", id);

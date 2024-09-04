@@ -1,10 +1,12 @@
 import { useAccount } from "wagmi";
 import { chainNameFromId, getChainIcon } from "../../utils/utils";
 import { useAavePositions, Position } from "../../hooks/useAavePositions";
+import { useAaveYieldInfo } from "../../hooks/useAaveYieldInfo";
 
 function MySavings2() {
   const { address } = useAccount();
   const { data } = useAavePositions();
+  const { data: yieldInfo } = useAaveYieldInfo();
 
   const withdrawAll = async () => {
     if (!address) return;
@@ -100,8 +102,11 @@ function MySavings2() {
                       {parseNumber(pos.amount)}
                     </td>
                     <td className="whitespace-nowrap px-3 py-5 text-sm text-gray-500">
-                      {/* Add APY here when available */}
-                      N/A
+                      {(
+                        (yieldInfo?.find((info) => info.chainId === pos.chainId)
+                          ?.supplyYield ?? 0) * 100
+                      ).toFixed(2)}
+                      %
                     </td>
                     <td className="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                       <button

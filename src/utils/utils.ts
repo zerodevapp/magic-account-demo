@@ -54,3 +54,10 @@ export const tokens: Token[] = [
   { symbol: "USDC", logo: usdcLogo },
   { symbol: "PEPE", logo: pepeLogo },
 ];
+
+export const chains = [
+  { id: 42161, name: "Arbitrum" },
+  { id: 137, name: "Polygon" },
+  { id: 10, name: "Optimism" },
+  { id: 8453, name: "Base" },
+];
