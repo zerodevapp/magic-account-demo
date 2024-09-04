@@ -3,6 +3,7 @@ import { useConnect } from "wagmi";
 // import GoogleIcon from "./GoogleIcon";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import PasskeyLogin from "./PasskeyLogin";
+import BrowserWalletIcon from "./BrowserWalletIcon";
 
 export default function LoginOptions() {
   const [showPasskeyLogin, setShowPasskeyLogin] = useState(false);
@@ -39,8 +40,8 @@ export default function LoginOptions() {
             }}
           />
           <LoginButton
-            icon={<FingerprintIcon />}
-            text="Connect with MetaMask"
+            icon={<BrowserWalletIcon />}
+            text="Connect with Browser Wallet"
             iconColor="text-orange-500"
             onClick={() => connect({ connector: connectors.find(connector => connector.name === 'Injected')! })}
             disabled={isPending}
