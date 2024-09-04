@@ -13,17 +13,19 @@ import { chains, tokenAddresses } from "../../services/uniswap/constants";
 import { Transition } from "@headlessui/react";
 import { getChainIcon } from "../../utils/utils";
 import { useReadCab } from "@magic-account/wagmi";
+import { getWETHBalance } from "../../services/uniswap/BalanceService";
 
 function Swap() {
   const [sellAmount, setSellAmount] = useState<string>("");
   const [buyAmount, setBuyAmount] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { switchChainAsync } = useSwitchChain();
-  const { address, chainId: currentChainId, isConnected} = useAccount();
+  const { address, chainId: currentChainId, isConnected } = useAccount();
   const { sendCallsAsync, data: id } = useSendCalls();
   const [selectedChainId, setSelectedChainId] = useState(Number(arbitrum.id));
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { data: cabBalance } = useReadCab()
+  const { data: cabBalance } = useReadCab();
+  const [wethBalance, setWethBalance] = useState<string>("0");
   const { data: callsStatus, refetch: refetchCallsStatus } = useCallsStatus({
     id: id as string,
     query: {
@@ -33,23 +35,28 @@ function Swap() {
     },
   });
 
+  useEffect(() => {
+    async function fetchWETHBalance() {
+      if (address && selectedChainId) {
+        const balance = await getWETHBalance(address, selectedChainId);
+        setWethBalance(balance);
+      }
+    }
+    fetchWETHBalance();
+  }, [address, selectedChainId]);
+
   const tokens = useMemo(() => {
-    const chainTokens = tokenAddresses[selectedChainId as keyof typeof tokenAddresses];
+    const chainTokens =
+      tokenAddresses[selectedChainId as keyof typeof tokenAddresses];
     return {
-      USDC: new Token(
-        selectedChainId,
-        chainTokens.USDC,
-        6,
-        "USDC",
-        "USD Coin"
-      ),
+      USDC: new Token(selectedChainId, chainTokens.USDC, 6, "USDC", "USD Coin"),
       WETH: new Token(
         selectedChainId,
         chainTokens.WETH,
         18,
         "WETH",
         "Wrapped Ether"
-      )
+      ),
     };
   }, [selectedChainId]);
 
@@ -187,7 +194,10 @@ function Swap() {
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-gray-500">Sell</span>
             <span className="text-sm text-gray-500">
-              Balance: ${cabBalance ? Number(formatUnits(cabBalance, 6)).toFixed(2) : "0.00"}
+              Balance: $
+              {cabBalance
+                ? Number(formatUnits(cabBalance, 6)).toFixed(2)
+                : "0.00"}
             </span>
           </div>
           <div className="flex items-center">
@@ -226,7 +236,9 @@ function Swap() {
         <div className="bg-gray-100 rounded-2xl p-4 mt-1">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-gray-500">Buy</span>
-            <span className="text-sm text-gray-500">Balance: 0</span>
+            <span className="text-sm text-gray-500">
+              Balance: {parseFloat(wethBalance).toFixed(4)} WETH
+            </span>
           </div>
           <div className="flex items-center">
             <input
