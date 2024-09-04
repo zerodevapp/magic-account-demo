@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { formatUnits, parseUnits } from "viem";
 import { useAccount } from "wagmi";
-// import { useBlockchainService } from '../../services/BlockchainService';
-// import { useAavePositionsService } from '../../services/AavePositionsService';
-import { chainNameFromId } from "../../utils/utils";
+import { chainNameFromId, getChainIcon } from "../../utils/utils";
 import { AaveGetSuppliesService } from "../../services/AaveGetSuppliesService";
-import arbitrumIcon from "../../assets/networks/arbitrum.svg";
-import optimismIcon from "../../assets/networks/optimism.svg";
-import polygonIcon from "../../assets/networks/polygon.svg";
-import baseIcon from "../../assets/networks/base.svg";
 import { useSupplyBorrowModal } from "../../providers/SupplyBorrowModalProvider";
 
 type Position = {
@@ -22,8 +16,6 @@ const MySavings: React.FC = () => {
   const [positions, setPositions] = useState<Position[]>([]);
   const [totals, setTotals] = useState({ usdc: "0" });
   const { refreshSavings } = useSupplyBorrowModal();
-  // const { getMultichainAddress, executeItx, getSuggestedGasInfo } = useBlockchainService();
-  // const { getSuppliedPositions } = useAavePositionsService();
 
   useEffect(() => {
     const fetchPositions = async () => {
@@ -51,79 +43,23 @@ const MySavings: React.FC = () => {
     });
   };
 
-  const getNetworkIcon = (chainId: number) => {
-    const chainName = chainNameFromId(chainId).toLowerCase();
-    switch (chainName) {
-      case "arbitrum":
-        return arbitrumIcon;
-      case "optimism":
-        return optimismIcon;
-      case "polygon":
-        return polygonIcon;
-      case "base":
-        return baseIcon;
-      default:
-        return ""; // You might want to add a default icon here
-    }
-  };
-
   const withdrawAll = async () => {
     if (!address) return;
     alert("Withdraw all not implemented");
-    // const transactions = positions.flatMap(position => {
-    //   const amount = parseUnits(position.amount, 6);
-    //   return aaveSupplyEncodeService.encodeSupplyTxs(
-    //     position.token as `0x${string}`,
-    //     position.chainId,
-    //     amount,
-    //     address
-    //   );
-    // });
-
-    // try {
-    //   const gasInfo = await getSuggestedGasInfo();
-    //   await executeItx(transactions, gasInfo);
-    //   // Refresh positions after withdrawal
-    //   const fetchedPositions = await getSuppliedPositions(address);
-    //   setPositions(fetchedPositions);
-    //   calculateTotals(fetchedPositions);
-    // } catch (error) {
-    //   console.error('Error withdrawing all:', error);
-    //   // Handle error (e.g., show error message to user)
-    // }
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const openWithdraw = async (_position: Position) => {
     if (!address) return;
     alert("Withdraw not implemented");
-    // const amount = parseUnits(position.amount, 6);
-    // const transactions = aaveSupplyEncodeService.encodeSupplyTxs(
-    //   position.token as `0x${string}`,
-    //   position.chainId,
-    //   amount,
-    //   address
-    // );
-
-    // try {
-    //   const gasInfo = await getSuggestedGasInfo();
-    //   await executeItx(transactions, gasInfo);
-    //   // Refresh positions after withdrawal
-    //   const fetchedPositions = await getSuppliedPositions(address);
-    //   setPositions(fetchedPositions);
-    //   calculateTotals(fetchedPositions);
-    // } catch (error) {
-    //   console.error('Error withdrawing:', error);
-    //   // Handle error (e.g., show error message to user)
-    // }
   };
 
   const parseNumber = (num: string) => parseFloat(num).toFixed(2);
 
   return (
-    <div className="col-span-2 shadow-md">
+    <div className="col-span-2 shadow-md rounded-3xl">
       <div className="col-span-1">
-        <div className="px-8 py-5 bg-white min-h-24 flex flex-col justify-center border border-slate-100 rounded-md col-span-1">
+        <div className="px-8 py-5 bg-white min-h-24 flex flex-col justify-center border border-slate-100 rounded-3xl col-span-1">
           <div className="font-semibold w-full flex flex-row items-center justify-between">
             <div className="flex flex-row items-center gap-x-4">
               <svg
@@ -200,7 +136,7 @@ const MySavings: React.FC = () => {
                 <div className="text-sm h-full flex flex-row gap-x-2 items-center">
                   <img
                     className="h-4"
-                    src={getNetworkIcon(pos.chainId)}
+                    src={getChainIcon(pos.chainId)}
                     alt={chainNameFromId(pos.chainId)}
                   />
                   {chainNameFromId(pos.chainId)}

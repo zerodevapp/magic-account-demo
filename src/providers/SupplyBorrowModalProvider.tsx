@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { createContext, useState, useContext, useEffect } from "react";
 import Modal from "../components/Modal";
-import SupplyBorrowModal from "../components/aave/SupplyBorrow";
+import SupplyBorrowModal from "../components/aave/UsdcSaveModal";
 import { useSendCalls, useCallsStatus } from "wagmi/experimental";
 import {
   AaveSupplyEncodeService,

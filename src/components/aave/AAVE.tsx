@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import UsdcSaveModal from "./UsdcSaveModal";
+import UsdcSaveModal from "./UsdcSaveWidget";
 import MySavings from "./MySavings";
 import {
   AaveV3YieldService,
@@ -24,13 +24,13 @@ function AAVE() {
     <div className="flex flex-col gap-2">
       {!usdcYields ? (
         <>
-          <div className="bg-white rounded-lg shadow-md p-6 animate-pulse">
+          <div className="bg-white rounded-3xl shadow-md p-6 animate-pulse">
             <div className="h-10 bg-gray-200 rounded w-3/4 mb-4"></div>
             <div className="h-24 bg-gray-200 rounded mb-4"></div>
             <div className="h-8 bg-gray-200 rounded w-1/2"></div>
           </div>
           {isConnected && (
-            <div className="bg-white rounded-lg shadow-md p-6 animate-pulse">
+            <div className="bg-white rounded-3xl shadow-md p-6 animate-pulse">
               <div className="h-10 bg-gray-200 rounded w-1/2 mb-4"></div>
               <div className="h-24 bg-gray-200 rounded"></div>
             </div>

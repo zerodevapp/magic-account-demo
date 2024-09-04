@@ -37,7 +37,7 @@ export function getChainIcon(chainId: number) {
     case 8453:
       return BaseIcon;
     default:
-      return null;
+      return '';
   }
 };
 

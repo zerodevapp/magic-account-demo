@@ -1,116 +1,407 @@
-import { YieldInfo } from "../../services/AaveV3YieldService";
-import usdcLogo from "../../assets/usdc.png";
-import { useSupplyBorrowModal } from "../../providers/SupplyBorrowModalProvider";
-import { useReadCab } from "@magic-account/wagmi";
-import { formatUnits } from "viem";
-import { useAccount } from "wagmi";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { Transition } from "@headlessui/react";
+import ArbitrumIcon from "../../assets/networks/arbitrum.svg";
+import OptimismIcon from "../../assets/networks/optimism.svg";
+import PolygonIcon from "../../assets/networks/polygon.svg";
+import BaseIcon from "../../assets/networks/base.svg";
+import {
+  AaveV3YieldService,
+  YieldInfo,
+} from "../../services/AaveV3YieldService";
+import Alert from "./Alert";
 
 interface UsdcSaveModalProps {
-  usdcYields: YieldInfo[];
+  isVisible: boolean;
+  transferPending: boolean;
+  tokenSymbol: string;
+  tokenAddress: string;
+  apy: number;
+  chainName: string;
+  chainId: number;
+  marketAddress: string;
+  balances: {
+    usdc: string;
+    usdt: string;
+  };
+  onClose: () => void;
+  onSubmit: (data: any) => void;
 }
 
-function UsdcSaveModal({ usdcYields }: UsdcSaveModalProps) {
-  const { openModal } = useSupplyBorrowModal();
-  const { isConnected } = useAccount();
-  const { data: cabBalance } = useReadCab();
+function UsdcSaveModal({
+  isVisible,
+  transferPending,
+  tokenSymbol,
+  tokenAddress,
+  apy,
+  chainName,
+  chainId,
+  marketAddress,
+  balances,
+  onClose,
+  onSubmit,
+}: UsdcSaveModalProps) {
+  const { register, handleSubmit, setValue, watch } = useForm();
+  const [selectedChain, setSelectedChain] = useState({
+    name: chainName,
+    id: chainId,
+  });
+  const [maxBalance, setMaxBalance] = useState("0");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+  const amount = watch("amount");
+  const [yieldInfo, setYieldInfo] = useState<YieldInfo[]>([]);
+  const [currentYield, setCurrentYield] = useState<number>(apy);
+  const aaveV3YieldService = new AaveV3YieldService();
 
-  const handleSaveClick = () => {
-    if (usdcYields) {
-      openModal({
-        actionType: "Supply",
-        tokenSymbol: "USDC",
-        tokenAddress: usdcYields[0].tokenAddress,
-        apy: usdcYields[0].supplyYield,
-        chainName: usdcYields[0].chainName,
-        chainId: usdcYields[0].chainId,
-        marketAddress: usdcYields[0].marketAddress,
-        balances: {
-          usdc: cabBalance ? formatUnits(cabBalance, 6) : "0.00",
-          usdt: "0.00", // Replace with actual balance
-        },
-      });
+  useEffect(() => {
+    // Set default values when the component loads
+    setValue("chainId", chainId);
+    setValue("chainName", chainName);
+    setValue("tokenAddress", tokenAddress);
+    setValue("marketAddress", marketAddress);
+    setCurrentYield(apy);
+  }, [chainId, chainName, tokenAddress, marketAddress, apy, setValue]);
+
+  useEffect(() => {
+    const result =
+      tokenSymbol === "USDC"
+        ? parseFloat(balances.usdc)
+        : parseFloat(balances.usdt);
+    if (result === 0) {
+      setMaxBalance("0");
+    } else {
+      const buffer = 0.1;
+      const reducedResult = result - buffer;
+      setMaxBalance(reducedResult <= 0 ? "0" : reducedResult.toFixed(2));
+    }
+  }, [balances, tokenSymbol]);
+
+  const chains = [
+    { id: 42161, name: "Arbitrum" },
+    { id: 137, name: "Polygon" },
+    { id: 10, name: "Optimism" },
+    { id: 8453, name: "Base" },
+  ];
+
+  const getChainIcon = (chainId: number) => {
+    switch (chainId) {
+      case 42161:
+        return ArbitrumIcon;
+      case 137:
+        return PolygonIcon;
+      case 10:
+        return OptimismIcon;
+      case 8453:
+        return BaseIcon;
+      default:
+        return null;
     }
   };
 
-  if (!usdcYields) {
-    return <div>Loading...</div>;
-  }
+  useEffect(() => {
+    fetchYieldInfo();
+  }, []);
+
+  const fetchYieldInfo = async () => {
+    try {
+      const info = await aaveV3YieldService.getYieldInfoForSymbol("USDC");
+      setYieldInfo(info);
+    } catch (error) {
+      console.error("Error fetching yield info:", error);
+    }
+  };
+
+  const setNewChain = (id: number) => {
+    const selected = chains.find((chain) => chain.id === id);
+    if (selected) {
+      setSelectedChain({ name: selected.name, id: selected.id });
+      const newYieldInfo = yieldInfo.find((info) => info.chainId === id);
+      if (newYieldInfo) {
+        setCurrentYield(newYieldInfo.supplyYield);
+        setValue("chainId", id);
+        setValue("chainName", selected.name);
+        setValue("tokenAddress", newYieldInfo.tokenAddress);
+        setValue("marketAddress", newYieldInfo.marketAddress);
+      }
+    }
+    toggleDropdown();
+  };
+
+  const setMaxAvailable = () => {
+    setValue("amount", maxBalance);
+  };
+
+  const handleFormSubmit = (data: any) => {
+    onSubmit(data);
+  };
+
+  if (!isVisible) return null;
 
   return (
-    <div className="bg-white py-8 sm:py-8">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl lg:max-w-none">
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-4">
-              <img src={usdcLogo} alt="USDC Logo" className="w-10 h-10 mr-3" />
-              <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                USDC Save/Borrow
-              </h2>
+    <>
+      {/* <div className="bg-white rounded-lg border max-w-lg w-full p-10 space-y-4"> */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-gray-900 flex items-center space-x-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+            />
+          </svg>
+          <span>Save {tokenSymbol}</span>
+        </h2>
+      </div>
+
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+        <input type="hidden" {...register("chainId")} />
+        <input type="hidden" {...register("chainName")} />
+        <div>
+          <label
+            htmlFor="amount"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Amount to put into savings
+          </label>
+          <div className="relative mt-2 rounded-md shadow-sm">
+            <input
+              id="amount"
+              {...register("amount", {
+                required: true,
+                min: 0,
+                max: parseFloat(maxBalance),
+                valueAsNumber: true,
+                validate: (value) => {
+                  const numValue = parseFloat(value);
+                  return !isNaN(numValue) && numValue <= parseFloat(maxBalance);
+                },
+              })}
+              type="text"
+              placeholder="0.00"
+              aria-describedby="amount-currency"
+              className="block w-full rounded-md border-0 py-1.5 pl-7 pr-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            />
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+              <span id="amount-currency" className="text-gray-500 sm:text-sm">
+                {tokenSymbol}
+              </span>
             </div>
-            <p className="mt-2 text-lg leading-8 text-gray-600">
-              Compare savings rates across different chains
-            </p>
           </div>
-          <dl className="mt-4 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center sm:grid-cols-2 lg:grid-cols-4">
-            {usdcYields.map((usdcYield, index) => (
-              <div
-                key={index}
-                className="flex flex-col bg-gray-400/5 p-4 sm:p-6 lg:p-8"
-              >
-                <dt className="text-xs sm:text-sm font-semibold leading-6 text-gray-600">
-                  {usdcYield.chainName}
-                </dt>
-                <dd
-                  className={`order-first text-2xl sm:text-3xl font-semibold tracking-tight ${
-                    index === 0 ? "text-green-500" : "text-gray-900"
-                  } flex items-center justify-center`}
-                >
-                  {index === 0 && (
-                    <svg
-                      className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 mr-1 sm:mr-2 flex-shrink-0"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                      />
-                    </svg>
-                  )}
-                  <span className="truncate">
-                    {(usdcYield.supplyYield * 100).toFixed(2)}%
-                  </span>
-                </dd>
-              </div>
-            ))}
-          </dl>
-          <div className="mt-4 flex justify-center">
-            <button
-              onClick={handleSaveClick}
-              disabled={!isConnected}
-              className="py-2 px-4 bg-blue-600 text-white rounded-md flex items-center justify-center hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          <div className="my-2 w-full flex justify-end text-xs text-slate-600 font-normal">
+            <div
+              onClick={setMaxAvailable}
+              className="underline cursor-pointer mr-1"
             >
+              Max available
+            </div>
+            ({maxBalance})
+          </div>
+          <Alert
+            text="Max available amount is smaller than your balance to account for transaction costs."
+            showDetails={false}
+          />
+        </div>
+
+        <div className="bg-gray-50 grid grid-cols-2 rounded p-6 text-slate-700 gap-x-4 gap-y-10 text-sm">
+          <div className="flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 mr-2 text-green-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+            </svg>
+            <div className="flex flex-col">
+              <span className="font-semibold text-xs text-slate-600">
+                Savings APY
+              </span>
+              <span className="text-green-600 font-semibold">
+                {(currentYield * 100).toFixed(2)}%
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-2 text-blue-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              />
+            </svg>
+            <div className="flex flex-col">
+              <span className="font-semibold text-xs text-slate-600">
+                Token
+              </span>
+              <span className="font-mono">{tokenSymbol}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="w-full">
+          <div className="relative">
+            <div
+              onClick={toggleDropdown}
+              className="w-full flex flex-row items-center gap-x-2 text-sm justify-between cursor-pointer"
+            >
+              <div className="flex items-center">
+                <img
+                  src={getChainIcon(selectedChain.id) ?? ""}
+                  alt={selectedChain.name}
+                  className="h-6 w-6 mr-2"
+                />
+                <div className="flex flex-col">
+                  <span className="font-semibold text-xs text-slate-600">
+                    Supplying to pool:
+                  </span>
+                  <span>
+                    {selectedChain.name} (ID: {selectedChain.id})
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-row items-center px-4 text-sm py-3 bg-slate-50 hover:bg-slate-100 rounded-md justify-end gap-x-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="lucide lucide-arrow-down-up h-5 w-5"
+                >
+                  <path d="m3 16 4 4 4-4" />
+                  <path d="M7 20V4" />
+                  <path d="m21 8-4-4-4 4" />
+                  <path d="M17 4v16" />
+                </svg>
+              </div>
+            </div>
+
+            <Transition
+              show={isDropdownOpen}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <div className="absolute right-0 z-10 mt-2 w-full origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div className="py-1">
+                  {chains.map((chain) => (
+                    <div
+                      key={chain.id}
+                      onClick={() => setNewChain(chain.id)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                    >
+                      {chain.name} (ID: {chain.id})
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Transition>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 items-center justify-end space-x-3 pt-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="button-secondary flex items-center justify-center"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={3}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+            <div className="mt-[0.1rem]">Cancel</div>
+          </button>
+          <button
+            type="submit"
+            disabled={!amount || transferPending}
+            className="button-primary flex items-center justify-center"
+          >
+            {transferPending ? (
+              <svg
+                className="animate-spin h-5 w-5 mr-2 text-indigo-200"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            ) : (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5 mr-2"
-                viewBox="0 0 20 20"
-                fill="currentColor"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
                 <path
-                  fillRule="evenodd"
-                  d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z"
-                  clipRule="evenodd"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={3}
+                  d="M5 13l4 4L19 7"
                 />
               </svg>
-              Save
-            </button>
-          </div>
+            )}
+            <div className="mt-[0.1rem]">
+              {transferPending ? "Processing" : "Confirm"}
+            </div>
+          </button>
         </div>
-      </div>
-    </div>
+      </form>
+      {/* </div> */}
+    </>
   );
 }
 
