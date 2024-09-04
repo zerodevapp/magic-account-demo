@@ -5,7 +5,7 @@ import { WagmiProvider, createConfig, http } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { polygon, arbitrum, base, optimism } from "wagmi/chains";
 import { passkeyConnector, wrapEOAConnector } from "@magic-account/wagmi";
-import { SupplyBorrowModalProvider } from "./providers/SupplyBorrowModalProvider";
+import { SupplyModalProvider } from "./providers/SupplyModalProvider";
 
 export default function Providers({ children }: { children: ReactNode }) {
   const config = createConfig({
@@ -25,7 +25,7 @@ export default function Providers({ children }: { children: ReactNode }) {
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <AuthModalProvider>
-          <SupplyBorrowModalProvider>{children}</SupplyBorrowModalProvider>
+          <SupplyModalProvider>{children}</SupplyModalProvider>
         </AuthModalProvider>
       </QueryClientProvider>
     </WagmiProvider>

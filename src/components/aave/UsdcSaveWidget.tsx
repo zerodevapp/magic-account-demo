@@ -1,6 +1,6 @@
 import { YieldInfo } from "../../services/AaveV3YieldService";
 import usdcLogo from "../../assets/usdc.png";
-import { useSupplyBorrowModal } from "../../providers/SupplyBorrowModalProvider";
+import { useSupplyModal } from "../../providers/SupplyModalProvider";
 import { useReadCab } from "@magic-account/wagmi";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
@@ -10,7 +10,7 @@ interface UsdcSaveModalProps {
 }
 
 function UsdcSaveWidget({ usdcYields }: UsdcSaveModalProps) {
-  const { openModal } = useSupplyBorrowModal();
+  const { openModal } = useSupplyModal();
   const { isConnected } = useAccount();
   const { data: cabBalance } = useReadCab();
 

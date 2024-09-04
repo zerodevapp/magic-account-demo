@@ -47,6 +47,6 @@ export const useAavePositions = () => {
     queryFn: () => fetchPositions(address || ''),
     enabled: !!address,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchInterval: 5 * 60 * 1000, // 5 minutes
+    refetchInterval: 1 * 60 * 1000, // 1 minute
   });
 };
