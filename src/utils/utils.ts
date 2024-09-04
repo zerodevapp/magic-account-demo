@@ -8,7 +8,7 @@ import daiLogo from "../assets/dai.png";
 import usdtLogo from "../assets/usdt.png";
 import wbtcLogo from "../assets/wbtc.svg";
 import usdcLogo from "../assets/usdc.png";
-import pepeLogo from "../assets/pepe.jpeg";
+// import pepeLogo from "../assets/pepe.jpeg";
 
 
 export function chainNameFromId(chainId: number): string {
