@@ -8,7 +8,7 @@ function Header() {
         <img
           src={logo}
           alt="Magic Account Logo"
-          className="h-12 object-contain"
+          className="h-16 object-contain"
         />
         <ConnectButton />
       </div>

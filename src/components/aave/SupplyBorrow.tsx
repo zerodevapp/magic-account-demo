@@ -43,8 +43,8 @@ const SupplyBorrowModal: React.FC<SupplyBorrowModalProps> = ({
 }) => {
   const { register, handleSubmit, setValue, watch } = useForm();
   const [selectedChain, setSelectedChain] = useState({
-    name: "Polygon",
-    id: 137,
+    name: chainName,
+    id: chainId,
   });
   const [maxBalance, setMaxBalance] = useState("0");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

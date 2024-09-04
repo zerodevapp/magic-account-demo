@@ -30,7 +30,7 @@ function Account() {
 
   if (!isConnected) {
     return (
-      <div className="bg-white shadow-md rounded-lg p-6 flex items-center justify-center h-64 mt-[70px]">
+      <div className="bg-white shadow-md rounded-lg p-6 flex items-center justify-center h-64 md:mt-[70px] w-full">
         <p className="text-xl font-semibold text-gray-600">
           Connect to view account
         </p>
@@ -39,7 +39,7 @@ function Account() {
   }
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6 mt-[70px]">
+    <div className="bg-white shadow-md rounded-lg p-6 md:mt-[70px] w-full">
       <h2 className="text-2xl font-bold mb-4">Magic Account Details</h2>
 
       <div className="mb-4">

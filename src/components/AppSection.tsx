@@ -17,7 +17,7 @@ function AppSection() {
   const [currentTab, setCurrentTab] = useState("AAVE");
 
   return (
-    <div className="flex-grow">
+    <div className="flex-grow w-full">
       <div className="sm:hidden">
         <label htmlFor="tabs" className="sr-only">
           Select a tab

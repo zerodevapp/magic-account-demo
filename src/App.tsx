@@ -8,8 +8,10 @@ function App() {
     <div className="min-h-screen flex flex-col bg-slate-100">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8">
-        <div className="flex flex-row items-start justify-start w-full gap-4">
-          <Account />
+        <div className="flex flex-col md:flex-row items-start justify-start w-full gap-4">
+          <div className="w-full md:max-w-[32%]">
+            <Account />
+          </div>
           <AppSection />
         </div>
       </main>

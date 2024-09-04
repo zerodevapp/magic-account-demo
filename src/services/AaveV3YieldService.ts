@@ -75,6 +75,14 @@ export class AaveV3YieldService {
         return this.getBestYields(mcUSDC);
     }
 
+    async getSortedYieldsForSymbol(symbol: 'USDC' | 'USDT'): Promise<YieldInfo[]> {
+        if (symbol !== 'USDC') {
+            throw new Error('Only USDC is supported');
+        }
+        const yieldInfos = await this.getYieldInfoForSymbol(symbol);
+        return yieldInfos.sort((a, b) => b.supplyYield - a.supplyYield);
+    }
+
     public async getYieldInfoForSymbol(symbol: 'USDC' | 'USDT'): Promise<YieldInfo[]> {
         if (symbol !== 'USDC') {
             throw new Error('Only USDC is supported');
