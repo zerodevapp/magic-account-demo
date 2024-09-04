@@ -1,4 +1,3 @@
-import React from "react";
 import {
   YieldInfo,
 } from "../../services/AaveV3YieldService";
