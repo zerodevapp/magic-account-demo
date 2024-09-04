@@ -35,13 +35,13 @@ function Swap() {
     },
   });
 
-  useEffect(() => {
-    async function fetchWETHBalance() {
-      if (address && selectedChainId) {
-        const balance = await getWETHBalance(address, selectedChainId);
-        setWethBalance(balance);
-      }
+  const fetchWETHBalance = async () => {
+    if (address && selectedChainId) {
+      const balance = await getWETHBalance(address, selectedChainId);
+      setWethBalance(balance);
     }
+  };
+  useEffect(() => {
     fetchWETHBalance();
   }, [address, selectedChainId]);
 
@@ -66,6 +66,7 @@ function Swap() {
       setIsLoading(false);
       // You might want to update balances or show a success message here
       console.log("Swap confirmed");
+      fetchWETHBalance();
     }
   }, [callsStatus?.status, refetchCallsStatus]);
 
@@ -107,34 +108,36 @@ function Swap() {
 
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
+  const fetchQuote = async () => {
+    if (sellAmount) {
+      try {
+        const quote = await getQuote(
+          sellAmount,
+          tokens.USDC,
+          tokens.WETH,
+          500,
+          selectedChainId!
+        );
+        console.log({ quote });
+        setBuyAmount(quote);
+      } catch (error) {
+        console.error("Error fetching quote:", error);
+        setBuyAmount("");
+      }
+    } else {
+      setBuyAmount("");
+    }
+  };
+  
   const setNewChain = async (chainId: number) => {
     setSelectedChainId(chainId);
     toggleDropdown();
+    fetchQuote();
   };
 
   useEffect(() => {
-    async function fetchQuote() {
-      if (sellAmount) {
-        try {
-          const quote = await getQuote(
-            sellAmount,
-            tokens.USDC,
-            tokens.WETH,
-            500,
-            selectedChainId!
-          );
-          console.log({ quote });
-          setBuyAmount(quote);
-        } catch (error) {
-          console.error("Error fetching quote:", error);
-          setBuyAmount("");
-        }
-      } else {
-        setBuyAmount("");
-      }
-    }
     fetchQuote();
-  }, [sellAmount, selectedChainId, tokens]);
+  }, [sellAmount, tokens]);
 
   return (
     <div className="bg-white rounded-3xl shadow-lg p-4 w-[464px]">
@@ -169,20 +172,23 @@ function Swap() {
           >
             <div className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
               <div className="py-1">
-                {Object.entries(chains).map(([chainId, chain]) => (
-                  <div
-                    key={chainId}
-                    onClick={() => setNewChain(Number(chainId))}
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
-                  >
-                    <img
-                      src={getChainIcon(Number(chainId)) ?? ""}
-                      alt={chain.chain.name}
-                      className="h-5 w-5 mr-2"
-                    />
-                    {chain.chain.name}
-                  </div>
-                ))}
+                {Object.entries(chains).map(([chainId, chain]) => {
+                  if (Number(chainId) === 8453) return null;
+                  return (
+                    <div
+                      key={chainId}
+                      onClick={() => setNewChain(Number(chainId))}
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                    >
+                      <img
+                        src={getChainIcon(Number(chainId)) ?? ""}
+                        alt={chain.chain.name}
+                        className="h-5 w-5 mr-2"
+                      />
+                      {chain.chain.name}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </Transition>
@@ -237,7 +243,7 @@ function Swap() {
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-gray-500">Buy</span>
             <span className="text-sm text-gray-500">
-              Balance: {parseFloat(wethBalance).toFixed(4)} WETH
+              Balance: {parseFloat(wethBalance).toFixed(6)} WETH
             </span>
           </div>
           <div className="flex items-center">

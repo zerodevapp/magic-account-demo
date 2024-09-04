@@ -45,7 +45,7 @@ export const tokenAddresses = {
         WETH: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
     },
     [optimism.id]: {
-        USDC: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+        USDC: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85',
         WETH: '0x4200000000000000000000000000000000000006',
     },
 };
