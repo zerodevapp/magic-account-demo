@@ -52,7 +52,7 @@ export const tokens: Token[] = [
   { symbol: "USDT", logo: usdtLogo },
   { symbol: "WBTC", logo: wbtcLogo },
   { symbol: "USDC", logo: usdcLogo },
-  { symbol: "PEPE", logo: pepeLogo },
+  // { symbol: "PEPE", logo: pepeLogo },
 ];
 
 export const chains = [

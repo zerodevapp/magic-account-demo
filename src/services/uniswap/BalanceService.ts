@@ -1,5 +1,6 @@
-import { createPublicClient, http, formatUnits, Address } from 'viem';
-import { chains, tokenAddresses, tokenDecimals } from './constants';
+import { formatUnits, Address } from 'viem';
+import { getPublicClient } from '../uniswap/constants';
+import { tokenAddresses, tokenDecimals } from './constants';
 import { erc20Abi } from 'viem';
 
 export async function getTokenBalance(
@@ -7,7 +8,6 @@ export async function getTokenBalance(
     chainId: number,
     token: keyof typeof tokenAddresses[keyof typeof tokenAddresses]
 ): Promise<string> {
-    const chain = chains[chainId as keyof typeof chains].chain;
     const tokenAddress = tokenAddresses[chainId as keyof typeof tokenAddresses][token] as Address;
 
     if (!address) {
@@ -17,10 +17,7 @@ export async function getTokenBalance(
         throw new Error(`Token ${token} not supported on chain ${chainId}`);
     }
 
-    const publicClient = createPublicClient({
-        chain,
-        transport: http(),
-    });
+    const publicClient = getPublicClient(chainId);
 
     try {
         const balance = await publicClient.readContract({

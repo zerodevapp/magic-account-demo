@@ -1,5 +1,6 @@
-import { Address, createPublicClient, encodeFunctionData, http, parseAbi, PublicClient } from 'viem';
+import { Address, encodeFunctionData, parseAbi, PublicClient } from 'viem';
 import { Chain, optimism, arbitrum, polygon, base } from 'viem/chains';
+import { getPublicClient } from './uniswap/constants';
 import { mcUSDC } from './tokens.constants';
 
 interface SuppliedPosition {
@@ -31,10 +32,10 @@ export class AaveGetSuppliesService {
   private initializeClients() {
     const chains: Chain[] = [optimism, arbitrum, polygon, base];
     chains.forEach(chain => {
-      this.clients.set(chain.id, createPublicClient({
-        chain,
-        transport: http()
-      }));
+      const client = getPublicClient(chain.id) as PublicClient;
+      if (client) {
+        this.clients.set(chain.id, client);
+      }
     });
   }
 

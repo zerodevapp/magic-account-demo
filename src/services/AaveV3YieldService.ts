@@ -1,4 +1,5 @@
-import { Address, createPublicClient, http, PublicClient, getContract, formatUnits } from 'viem';
+import { Address, PublicClient, getContract, formatUnits } from 'viem';
+import { getPublicClient } from './uniswap/constants';
 import { mcUSDC } from './tokens.constants';
 import { aaveV3PoolAbi } from './generated';
 import { polygon, arbitrum, optimism, base } from 'viem/chains';
@@ -54,10 +55,10 @@ export class AaveV3YieldService {
     private initializeClients(): void {
         const chains = [polygon, arbitrum, optimism, base];
         chains.forEach(chain => {
-            this.clients.set(chain.id, createPublicClient({
-                chain,
-                transport: http()
-            }) as PublicClient);
+            const client = getPublicClient(chain.id) as PublicClient;
+            if (client) {
+                this.clients.set(chain.id, client);
+            }
         });
     }
 

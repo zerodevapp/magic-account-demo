@@ -3,6 +3,7 @@ import { createPublicClient, http } from 'viem';
 export const chains = {
     [arbitrum.id]: {
         chain: arbitrum,
+        rpcUrl: 'https://arb-mainnet.g.alchemy.com/v2/BEIWikIh88ab5Mj1UDFd_oVynEdicBMj',
         poolFactoryAddress: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
         quoterAddress: '0x61fFE014bA17989E743c5F6cB21bF9697530B21e',
         swapRouterAddress01: '0xE592427A0AEce92De3Edee1F18E0157C05861564',
@@ -10,6 +11,7 @@ export const chains = {
     },
     [base.id]: {
         chain: base,
+        rpcUrl: 'https://base-mainnet.g.alchemy.com/v2/BEIWikIh88ab5Mj1UDFd_oVynEdicBMj',
         poolFactoryAddress: '0x33128a8fC17869897dcE68Ed026d694621f6FDfD',
         quoterAddress: '0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a',
         swapRouterAddress02: '0x2626664c2603336E57B271c5C0b26F421741e481',
@@ -17,6 +19,7 @@ export const chains = {
     },
     [polygon.id]: {
         chain: polygon,
+        rpcUrl: 'https://polygon-mainnet.g.alchemy.com/v2/BEIWikIh88ab5Mj1UDFd_oVynEdicBMj',
         poolFactoryAddress: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
         quoterAddress: '0x61fFE014bA17989E743c5F6cB21bF9697530B21e',
         swapRouterAddress01: '0xE592427A0AEce92De3Edee1F18E0157C05861564',
@@ -24,6 +27,7 @@ export const chains = {
     },
     [optimism.id]: {
         chain: optimism,
+        rpcUrl: 'https://opt-mainnet.g.alchemy.com/v2/BEIWikIh88ab5Mj1UDFd_oVynEdicBMj',
         poolFactoryAddress: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
         quoterAddress: '0x61fFE014bA17989E743c5F6cB21bF9697530B21e',
         swapRouterAddress01: '0xE592427A0AEce92De3Edee1F18E0157C05861564',
@@ -82,6 +86,6 @@ export function getPublicClient(chainId: number) {
     }
     return createPublicClient({
         chain: chains[chainId as keyof typeof chains].chain,
-        transport: http(),
+        transport: http(chains[chainId as keyof typeof chains].rpcUrl),
     })
 }
