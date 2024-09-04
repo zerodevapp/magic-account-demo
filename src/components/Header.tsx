@@ -3,12 +3,12 @@ import { ConnectButton } from './auth/ConnectButton';
 
 function Header() {
   return (
-    <header className="w-full p-4 bg-white">
+    <header className="w-full p-4 bg-white shadow-md">
       <div className="container mx-auto flex justify-between items-center">
         <img
           src={logo}
           alt="Magic Account Logo"
-          className="h-12 object-contain"
+          className="h-16 object-contain"
         />
         <ConnectButton />
       </div>

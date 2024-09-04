@@ -30,7 +30,7 @@ function Account() {
 
   if (!isConnected) {
     return (
-      <div className="bg-white shadow-md rounded-lg p-6 flex items-center justify-center h-64 mt-[70px]">
+      <div className="bg-white shadow-md rounded-lg p-6 flex items-center justify-center h-64 md:mt-[70px] w-full">
         <p className="text-xl font-semibold text-gray-600">
           Connect to view account
         </p>
@@ -39,8 +39,8 @@ function Account() {
   }
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6 mt-[70px]">
-      <h2 className="text-2xl font-bold mb-4">Magic Account Details</h2>
+    <div className="bg-white shadow-md rounded-lg p-6 md:mt-[70px] w-full">
+      <h2 className="text-2xl font-bold mb-4">Magic Account</h2>
 
       <div className="mb-4">
         <label className="text-sm font-medium text-gray-600">Address</label>
@@ -58,7 +58,7 @@ function Account() {
       </div>
 
       <div className="mb-4">
-        <label className="text-sm font-medium text-gray-600">CAB Enabled</label>
+        <label className="text-sm font-medium text-gray-600">Chain abstraction enabled</label>
         <p
           className={`mt-1 font-semibold ${
             isEnabledOnCurrentChain("USDC") ? "text-green-600" : "text-red-600"
@@ -86,10 +86,10 @@ function Account() {
 
       <div>
         <label className="text-sm font-medium text-gray-600">
-          CAB Balance (USDC)
+          Chain-abstracted balance (CAB)
         </label>
         <p className="mt-1 text-lg font-semibold">
-          ${cabBalance ? formatUnits(cabBalance, 6) : "0.00"}
+          {cabBalance ? formatUnits(cabBalance, 6) : "0.00"} USDC
         </p>
       </div>
     </div>

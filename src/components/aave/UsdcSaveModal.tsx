@@ -1,17 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Transition } from "@headlessui/react";
-import ArbitrumIcon from "../../assets/networks/arbitrum.svg";
-import OptimismIcon from "../../assets/networks/optimism.svg";
-import PolygonIcon from "../../assets/networks/polygon.svg";
-import BaseIcon from "../../assets/networks/base.svg";
-import {
-  AaveV3YieldService,
-  YieldInfo,
-} from "../../services/AaveV3YieldService";
-
-interface SupplyBorrowModalProps {
+import { tokens, getChainIcon } from "../../utils/utils";
+import { useAaveYieldInfo } from "../../hooks/useAaveYieldInfo";
+import Alert from "./Alert";
+import { chains } from "../../utils/utils";
+interface UsdcSaveModalProps {
   isVisible: boolean;
   transferPending: boolean;
   tokenSymbol: string;
@@ -25,10 +19,11 @@ interface SupplyBorrowModalProps {
     usdt: string;
   };
   onClose: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSubmit: (data: any) => void;
 }
 
-const SupplyBorrowModal: React.FC<SupplyBorrowModalProps> = ({
+function UsdcSaveModal({
   isVisible,
   transferPending,
   tokenSymbol,
@@ -40,11 +35,12 @@ const SupplyBorrowModal: React.FC<SupplyBorrowModalProps> = ({
   balances,
   onClose,
   onSubmit,
-}) => {
+}: UsdcSaveModalProps) {
   const { register, handleSubmit, setValue, watch } = useForm();
+  const { data: yieldInfo } = useAaveYieldInfo(tokenSymbol as 'USDC');
   const [selectedChain, setSelectedChain] = useState({
-    name: "Polygon",
-    id: 137,
+    name: chainName,
+    id: chainId,
   });
   const [maxBalance, setMaxBalance] = useState("0");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -52,9 +48,7 @@ const SupplyBorrowModal: React.FC<SupplyBorrowModalProps> = ({
     setIsDropdownOpen(!isDropdownOpen);
   };
   const amount = watch("amount");
-  const [yieldInfo, setYieldInfo] = useState<YieldInfo[]>([]);
   const [currentYield, setCurrentYield] = useState<number>(apy);
-  const aaveV3YieldService = new AaveV3YieldService();
 
   useEffect(() => {
     // Set default values when the component loads
@@ -79,46 +73,11 @@ const SupplyBorrowModal: React.FC<SupplyBorrowModalProps> = ({
     }
   }, [balances, tokenSymbol]);
 
-  const chains = [
-    { id: 42161, name: "Arbitrum" },
-    { id: 137, name: "Polygon" },
-    { id: 10, name: "Optimism" },
-    { id: 8453, name: "Base" },
-  ];
-
-  const getChainIcon = (chainId: number) => {
-    switch (chainId) {
-      case 42161:
-        return ArbitrumIcon;
-      case 137:
-        return PolygonIcon;
-      case 10:
-        return OptimismIcon;
-      case 8453:
-        return BaseIcon;
-      default:
-        return null;
-    }
-  };
-
-  useEffect(() => {
-    fetchYieldInfo();
-  }, []);
-
-  const fetchYieldInfo = async () => {
-    try {
-      const info = await aaveV3YieldService.getYieldInfoForSymbol("USDC");
-      setYieldInfo(info);
-    } catch (error) {
-      console.error("Error fetching yield info:", error);
-    }
-  };
-
   const setNewChain = (id: number) => {
     const selected = chains.find((chain) => chain.id === id);
     if (selected) {
       setSelectedChain({ name: selected.name, id: selected.id });
-      const newYieldInfo = yieldInfo.find((info) => info.chainId === id);
+      const newYieldInfo = yieldInfo?.find((info) => info.chainId === id);
       if (newYieldInfo) {
         setCurrentYield(newYieldInfo.supplyYield);
         setValue("chainId", id);
@@ -134,6 +93,7 @@ const SupplyBorrowModal: React.FC<SupplyBorrowModalProps> = ({
     setValue("amount", maxBalance);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleFormSubmit = (data: any) => {
     onSubmit(data);
   };
@@ -142,128 +102,29 @@ const SupplyBorrowModal: React.FC<SupplyBorrowModalProps> = ({
 
   return (
     <>
-      {/* <div className="bg-white rounded-lg border max-w-lg w-full p-10 space-y-4"> */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900 flex items-center space-x-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-8 w-8 text-indigo-800"
             fill="none"
             viewBox="0 0 24 24"
+            strokeWidth="1.5"
             stroke="currentColor"
+            className="w-6 h-6"
           >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
             />
           </svg>
-          <span className="mt-1">Save {tokenSymbol}</span>
+          <span>Supply {tokenSymbol}</span>
         </h2>
       </div>
 
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
         <input type="hidden" {...register("chainId")} />
         <input type="hidden" {...register("chainName")} />
-        <div>
-          <label
-            htmlFor="amount"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Amount to put into savings
-          </label>
-          <div className="relative border rounded-md grid grid-cols-12 mt-1">
-            <input
-              // type="number"
-              id="amount"
-              {...register("amount", {
-                required: true,
-                min: 0,
-                max: parseFloat(maxBalance),
-                valueAsNumber: true,
-                validate: (value) => {
-                  const numValue = parseFloat(value);
-                  return !isNaN(numValue) && numValue <= parseFloat(maxBalance);
-                },
-              })}
-              className="block py-3 px-4 border-gray-100 rounded-md text-lg outline-none sm:text-sm col-span-10 font-semibold"
-              placeholder="0.00"
-            />
-            <div className="absolute border-l pl-4 inset-y-0 col-span-2 right-0 pr-3 flex items-center pointer-events-none">
-              <span className="text-gray-500 sm:text-sm">{tokenSymbol}</span>
-            </div>
-          </div>
-          <div className="mt-2 w-full flex justify-end text-xs text-slate-600 font-normal">
-            <div
-              onClick={setMaxAvailable}
-              className="underline cursor-pointer mr-1"
-            >
-              Max available
-            </div>
-            ({maxBalance})
-          </div>
-          <div className="mt-2 py-3 bg-indigo-50 font-light text-xs px-4 gap-x-4 flex flex-row items-center text-indigo-700 rounded-md">
-            <div className="p-2 bg-indigo-500 font-semibold text-white rounded-sm">
-              i
-            </div>
-            <div>
-              Max available amount is smaller than your balance to account for
-              transaction costs.
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gray-50 grid grid-cols-2 rounded p-6 text-slate-700 gap-x-4 gap-y-10 text-sm">
-          <div className="flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 mr-2 text-green-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2.5}
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              />
-            </svg>
-            <div className="flex flex-col">
-              <span className="font-semibold text-xs text-slate-600">
-                Savings APY
-              </span>
-              <span className="text-green-600 font-semibold">
-                {(currentYield * 100).toFixed(2)}%
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-2 text-blue-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-              />
-            </svg>
-            <div className="flex flex-col">
-              <span className="font-semibold text-xs text-slate-600">
-                Token
-              </span>
-              <span className="font-mono">{tokenSymbol}</span>
-            </div>
-          </div>
-        </div>
-
         <div className="w-full">
           <div className="relative">
             <div
@@ -278,7 +139,7 @@ const SupplyBorrowModal: React.FC<SupplyBorrowModalProps> = ({
                 />
                 <div className="flex flex-col">
                   <span className="font-semibold text-xs text-slate-600">
-                    Supplying to pool:
+                    Select Aave Market
                   </span>
                   <span>
                     {selectedChain.name} (ID: {selectedChain.id})
@@ -330,6 +191,78 @@ const SupplyBorrowModal: React.FC<SupplyBorrowModalProps> = ({
               </div>
             </Transition>
           </div>
+        </div>
+
+        <div className="bg-gray-50 grid grid-cols-2 rounded p-6 text-slate-700 gap-x-4 gap-y-10 text-sm">
+          <div className="flex items-center">
+            <div className="flex flex-col">
+              <span className="font-semibold text-xs text-slate-600">
+                Savings APY
+              </span>
+              <span className="text-green-600 font-semibold">
+                {(currentYield * 100).toFixed(2)}%
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center">
+            <img
+              src={tokens.find((token) => token.symbol === "USDC")?.logo}
+              alt="USDC Logo"
+              className="h-5 w-5 mr-2"
+            />
+            <div className="flex flex-col">
+              <span className="font-semibold text-xs text-slate-600">
+                Token
+              </span>
+              <span className="font-mono">{tokenSymbol}</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label
+            htmlFor="amount"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Amount to supply:
+          </label>
+          <div className="relative mt-2 rounded-md shadow-sm">
+            <input
+              id="amount"
+              {...register("amount", {
+                required: true,
+                min: 0,
+                max: parseFloat(maxBalance),
+                valueAsNumber: true,
+                validate: (value) => {
+                  const numValue = parseFloat(value);
+                  return !isNaN(numValue) && numValue <= parseFloat(maxBalance);
+                },
+              })}
+              type="text"
+              placeholder="0.00"
+              aria-describedby="amount-currency"
+              className="block w-full rounded-md border-0 py-1.5 pl-7 pr-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            />
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+              <span id="amount-currency" className="text-gray-500 sm:text-sm">
+                {tokenSymbol}
+              </span>
+            </div>
+          </div>
+          <div className="my-2 w-full flex justify-end text-xs text-slate-600 font-normal">
+            <div
+              onClick={setMaxAvailable}
+              className="underline cursor-pointer mr-1"
+            >
+              Max available
+            </div>
+            ({maxBalance})
+          </div>
+          <Alert
+            text="Max available amount is smaller than your balance to account for transaction costs."
+            showDetails={false}
+          />
         </div>
 
         <div className="grid grid-cols-2 items-center justify-end space-x-3 pt-4">
@@ -405,6 +338,6 @@ const SupplyBorrowModal: React.FC<SupplyBorrowModalProps> = ({
       {/* </div> */}
     </>
   );
-};
+}
 
-export default SupplyBorrowModal;
+export default UsdcSaveModal;

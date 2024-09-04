@@ -19,6 +19,7 @@ const style = {
   p: 4,
   pt: 6,
   pb: 5,
+  outline: "none",
 };
 
 type Props = {
