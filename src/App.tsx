@@ -4,6 +4,7 @@ import "./App.css";
 import Account from "./components/Account";
 import AppSection from "./components/AppSection";
 import Modal from "./components/Modal";
+import { BackgroundImage } from "./components/BackgroundImages";
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,9 +14,10 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-100">
+    <div className="min-h-screen flex flex-col relative">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <BackgroundImage className="absolute inset-0 -z-10" />
+      <main className="flex-grow container mx-auto px-4 py-8 relative">
         <div className="flex flex-col md:flex-row items-start justify-start w-full gap-4">
           <div className="w-full md:max-w-[32%]">
             <Account />
@@ -23,12 +25,11 @@ function App() {
           <AppSection />
         </div>
       </main>
-      <footer className="bg-gray-100 py-4">
-        <div className="container mx-auto px-4">{/* Footer content */}</div>
-      </footer>
       <Modal open={isModalOpen} handleClose={() => setIsModalOpen(false)}>
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Welcome to ZeroDev's Magic Account demo</h2>
+          <h2 className="text-2xl font-bold mb-4">
+            Welcome to ZeroDev's Magic Account demo
+          </h2>
           <ol className="space-y-4 inline-block text-left py-4">
             {[
               "Connect or create a Magic Account",
