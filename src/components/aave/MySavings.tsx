@@ -33,7 +33,7 @@ function MySavings2() {
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <button
             onClick={withdrawAll}
-            className="block rounded-md bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            className="block rounded-md bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
           >
             Withdraw all
           </button>
@@ -106,7 +106,7 @@ function MySavings2() {
                     <td className="relative whitespace-nowrap py-5 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                       <button
                         onClick={() => openWithdraw(pos)}
-                        className="text-indigo-600 hover:text-indigo-900"
+                        className="text-blue-600 hover:text-blue-900"
                       >
                         Withdraw<span className="sr-only">, {pos.token}</span>
                       </button>
