@@ -1,74 +1,76 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { ChevronDownIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
 import usdcLogo from "../../assets/usdc.png";
-import ethLogo from "../../assets/eth.svg";
 import { Token } from "@uniswap/sdk-core";
-import { getQuote } from "../../services/uniswap/QuoteService";
 import { arbitrum } from "viem/chains";
 import { formatUnits } from "viem";
-import { useAccount, useSwitchChain } from "wagmi";
-import { getTradeTransactions } from "../../services/uniswap/TradeService";
-import { useSendCalls, useCallsStatus } from "wagmi/experimental";
-import { chains, tokenAddresses } from "../../services/uniswap/constants";
+import { useAccount } from "wagmi";
+import {
+  chains,
+  tokenAddresses,
+  tokenDecimals,
+} from "../../services/uniswap/constants";
 import { Transition } from "@headlessui/react";
 import { getChainIcon } from "../../utils/utils";
 import { useReadCab } from "@magic-account/wagmi";
-import { getWETHBalance } from "../../services/uniswap/BalanceService";
+import TokenSelectModal from "./TokenSelectModal";
+import { tokens as tokenData } from "../../utils/utils";
+import { useTokenBalance } from "../../hooks/useTokenBalance";
+import { useSwap } from "../../hooks/useSwap";
+import { useUniswapQuote } from "../../hooks/useUniswapQuote";
 
 function Swap() {
   const [sellAmount, setSellAmount] = useState<string>("");
-  const [buyAmount, setBuyAmount] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { switchChainAsync } = useSwitchChain();
-  const { address, chainId: currentChainId, isConnected } = useAccount();
-  const { sendCallsAsync, data: id } = useSendCalls();
+  const { address, chainId: isConnected } = useAccount();
   const [selectedChainId, setSelectedChainId] = useState(Number(arbitrum.id));
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { data: cabBalance } = useReadCab();
-  const [wethBalance, setWethBalance] = useState<string>("0");
-  const { data: callsStatus, refetch: refetchCallsStatus } = useCallsStatus({
-    id: id as string,
-    query: {
-      enabled: !!id,
-      refetchInterval: (data) =>
-        data.state.data?.status === "CONFIRMED" ? false : 2000,
+  const [isTokenSelectOpen, setIsTokenSelectOpen] = useState(false);
+  const [selectedToken, setSelectedToken] = useState("WETH");
+
+  const {
+    data: swapTokenBalance,
+    isLoading: isBalanceLoading,
+    error: balanceError,
+    refetch: refetchBalance,
+  } = useTokenBalance(
+    selectedToken as keyof (typeof tokenAddresses)[keyof typeof tokenAddresses],
+    selectedChainId
+  );
+
+  const { swap, isLoading } = useSwap({
+    onSuccess: () => {
+      setSellAmount("");
+      refetchBalance();
     },
   });
-
-  const fetchWETHBalance = async () => {
-    if (address && selectedChainId) {
-      const balance = await getWETHBalance(address, selectedChainId);
-      setWethBalance(balance);
-    }
-  };
-  useEffect(() => {
-    fetchWETHBalance();
-  }, [address, selectedChainId]);
 
   const tokens = useMemo(() => {
     const chainTokens =
       tokenAddresses[selectedChainId as keyof typeof tokenAddresses];
     return {
       USDC: new Token(selectedChainId, chainTokens.USDC, 6, "USDC", "USD Coin"),
-      WETH: new Token(
+      [selectedToken]: new Token(
         selectedChainId,
-        chainTokens.WETH,
-        18,
-        "WETH",
-        "Wrapped Ether"
+        chainTokens[selectedToken as keyof typeof chainTokens],
+        tokenDecimals[selectedToken as keyof typeof tokenDecimals] || 18,
+        selectedToken,
+        selectedToken
       ),
     };
-  }, [selectedChainId]);
+  }, [selectedChainId, selectedToken]);
 
-  useEffect(() => {
-    if (callsStatus?.status === "CONFIRMED") {
-      refetchCallsStatus();
-      setIsLoading(false);
-      // You might want to update balances or show a success message here
-      console.log("Swap confirmed");
-      fetchWETHBalance();
-    }
-  }, [callsStatus?.status, refetchCallsStatus]);
+  const { data: quoteAmount, isLoading: isQuoteLoading } = useUniswapQuote({
+    sellAmount,
+    tokenIn: tokens.USDC,
+    tokenOut: tokens[selectedToken as keyof typeof tokens],
+    fee: 500,
+    chainId: selectedChainId,
+  });
+
+  const handleTokenSelect = (token: string) => {
+    setSelectedToken(token);
+  };
 
   const handleSwap = async () => {
     if (!address) {
@@ -76,68 +78,25 @@ function Swap() {
       return;
     }
 
-    setIsLoading(true);
     try {
-      const transactions = await getTradeTransactions(
-        tokens.USDC,
-        tokens.WETH,
+      await swap({
+        sellToken: tokens.USDC,
+        buyToken: tokens[selectedToken as keyof typeof tokens],
         sellAmount,
-        address,
-        selectedChainId
-      );
-      console.log({ transactions });
-      const calls = transactions.map((tx) => ({
-        to: tx.to as `0x${string}`,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        value: BigInt((tx as any).value ?? 0),
-        data: tx.data as `0x${string}`,
-      }));
-
-      if (currentChainId !== selectedChainId) {
-        await switchChainAsync({ chainId: selectedChainId });
-      }
-
-      const result = await sendCallsAsync({ calls });
-      console.log("Swap transaction posted:", result);
+        selectedChainId,
+      });
     } catch (error) {
       console.error("Swap failed", error);
-      setIsLoading(false);
       // Show an error message to the user
     }
   };
 
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
-  const fetchQuote = async () => {
-    if (sellAmount) {
-      try {
-        const quote = await getQuote(
-          sellAmount,
-          tokens.USDC,
-          tokens.WETH,
-          500,
-          selectedChainId!
-        );
-        console.log({ quote });
-        setBuyAmount(quote);
-      } catch (error) {
-        console.error("Error fetching quote:", error);
-        setBuyAmount("");
-      }
-    } else {
-      setBuyAmount("");
-    }
-  };
-  
   const setNewChain = async (chainId: number) => {
     setSelectedChainId(chainId);
     toggleDropdown();
-    fetchQuote();
   };
-
-  useEffect(() => {
-    fetchQuote();
-  }, [sellAmount, tokens]);
 
   return (
     <div className="bg-white rounded-3xl shadow-lg p-4 w-[464px]">
@@ -243,16 +202,23 @@ function Swap() {
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-gray-500">Buy</span>
             <span className="text-sm text-gray-500">
-              Balance: {parseFloat(wethBalance).toFixed(6)} WETH
+              Balance:{" "}
+              {isBalanceLoading
+                ? "Loading..."
+                : balanceError
+                ? "Error fetching balance"
+                : `${parseFloat(swapTokenBalance || "0").toFixed(
+                    6
+                  )} ${selectedToken}`}
             </span>
           </div>
           <div className="flex items-center">
             <input
               type="number"
-              value={buyAmount}
+              value={quoteAmount ?? 0}
               readOnly
               className="bg-transparent text-3xl font-semibold w-full outline-none border-none focus:border-none active:border-none focus:outline-none focus:ring-0"
-              placeholder="0"
+              placeholder={isQuoteLoading ? "Loading..." : "0"}
               style={{
                 WebkitAppearance: "none",
                 MozAppearance: "textfield",
@@ -261,17 +227,27 @@ function Swap() {
                 boxShadow: "none",
               }}
             />
-            <button className="flex items-center bg-white rounded-2xl py-2 px-3 ml-2 hover:bg-gray-50">
-              <img src={ethLogo} alt="WETH" className="h-6 w-6 mr-2" />
-              <span className="font-semibold">WETH</span>
+            <button
+              className="flex items-center cursor-pointer bg-white rounded-2xl py-2 px-3 hover:bg-gray-200 w-44 justify-between"
+              onClick={() => setIsTokenSelectOpen(true)}
+            >
+              <img
+                src={
+                  tokenData.find((token) => token.symbol === selectedToken)
+                    ?.logo
+                }
+                alt={selectedToken}
+                className="h-6 w-6 mr-2 rounded-full"
+              />
+              <span className="font-semibold">{selectedToken}</span>
               <ChevronDownIcon className="h-4 w-4 ml-2" />
             </button>
           </div>
-          {buyAmount && (
+          {/* {quoteAmount && (
             <div className="text-sm text-gray-500 mt-1">
-              ${(parseFloat(buyAmount) * 2450).toFixed(2)}
+              ${(parseFloat(quoteAmount) * 2450).toFixed(2)}
             </div>
-          )}
+          )} */}
         </div>
       </div>
 
@@ -288,6 +264,11 @@ function Swap() {
           ? "Swap"
           : "Enter an amount"}
       </button>
+      <TokenSelectModal
+        open={isTokenSelectOpen}
+        onClose={() => setIsTokenSelectOpen(false)}
+        onSelect={handleTokenSelect}
+      />
     </div>
   );
 }
