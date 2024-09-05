@@ -30,7 +30,6 @@ export async function getTradeTransactions(
     const amountIn = fromReadableAmount(amount, tokenIn.decimals).toString()
     const quote = await getOutputQuote(swapRoute, amount, tokenIn, chainId);
 
-    console.log({ quote });
     const uncheckedTrade = Trade.createUncheckedTrade({
         route: swapRoute,
         inputAmount: CurrencyAmount.fromRawAmount(
@@ -142,8 +141,8 @@ export async function getTokenTransferApproval(token: Token, amount: string, add
         throw new Error('Public client required');
     }
 
-    const amountToApprove = fromReadableAmount(amount, token.decimals) * 2n
-    console.log({ amountToApprove });
+    const amountToApprove = fromReadableAmount(amount, token.decimals)
+
     try {
         const data = encodeFunctionData({
             abi: erc20Abi,

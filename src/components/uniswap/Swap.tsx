@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { ChevronDownIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
 import usdcLogo from "../../assets/usdc.png";
 import { Token } from "@uniswap/sdk-core";
@@ -21,9 +21,8 @@ import { useUniswapQuote } from "../../hooks/useUniswapQuote";
 import { toast } from "react-toastify";
 import { useTokenBalancesForChains } from "../../hooks/useTokenBalancesForChains";
 import { Button } from "@mui/material";
-import { useEstimateFeesCab } from "@magic-account/wagmi";
 
-type Call = { to: `0x${string}`; value: bigint; data: `0x${string}` };
+// type Call = { to: `0x${string}`; value: bigint; data: `0x${string}` };
 
 function Swap() {
   const [sellAmount, setSellAmount] = useState<string>("");
@@ -34,12 +33,6 @@ function Swap() {
   const [isTokenSelectOpen, setIsTokenSelectOpen] = useState(false);
   const [selectedToken, setSelectedToken] = useState("WETH");
   const { refetch: refetchBalances } = useTokenBalancesForChains(address);
-  const [calls, setCalls] = useState<Call[] | undefined>(undefined);
-  const { data: estimatedFeeData, isLoading: isEstimatedFeeLoading } =
-    useEstimateFeesCab(calls, undefined, {
-      enabled: !!calls && calls.length > 0,
-    });
-  console.log(estimatedFeeData);
 
   const {
     data: swapTokenBalance,
@@ -51,7 +44,7 @@ function Swap() {
     selectedChainId
   );
 
-  const { swap, isLoading, buildCalls } = useSwap({
+  const { swap, isLoading } = useSwap({
     onSuccess: (userOpHash: string) => {
       toast.success(
         <div className="flex flex-col items-start space-y-2 text-sm">
@@ -94,31 +87,39 @@ function Swap() {
     };
   }, [selectedChainId, selectedToken]);
 
-  useEffect(() => {
-    const updateCalls = async () => {
-      if (!sellAmount || !address) {
-        setCalls(undefined);
-        return;
-      }
+  // const debouncedUpdateCalls = useCallback(
+  //   debounce(async () => {
+  //     if (!sellAmount || !address) {
+  //       setCalls(undefined);
+  //       return;
+  //     }
 
-      try {
-        console.log({ sellAmount });
-        const newCalls = await buildCalls(
-          tokens.USDC,
-          tokens[selectedToken as keyof typeof tokens],
-          sellAmount,
-          selectedChainId
-        );
-        setCalls(newCalls);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
-        console.log({ error });
-        // do nothing
-      }
-    };
+  //     try {
+  //       console.log({ sellAmount });
+  //       const newCalls = await buildCalls(
+  //         tokens.USDC,
+  //         tokens[selectedToken as keyof typeof tokens],
+  //         sellAmount,
+  //         selectedChainId
+  //       );
+  //       console.log({ newCalls });
+  //       setCalls(newCalls);
+  //     } catch (error) {
+  //       console.log({ error });
+  //       // do nothing
+  //     }
+  //   }, 300),
+  //   [sellAmount, selectedToken, selectedChainId, address, buildCalls, tokens]
+  // );
 
-    updateCalls();
-  }, [sellAmount, selectedToken, selectedChainId, address, buildCalls, tokens]);
+  // useEffect(() => {
+  //   debouncedUpdateCalls();
+
+  //   // Cleanup function to cancel the debounce on unmount
+  //   return () => {
+  //     debouncedUpdateCalls.cancel();
+  //   };
+  // }, [sellAmount, selectedToken, selectedChainId, address, debouncedUpdateCalls]);
 
   const { data: quoteAmount, isLoading: isQuoteLoading } = useUniswapQuote({
     sellAmount,
@@ -316,7 +317,7 @@ function Swap() {
         </div>
       </div>
 
-      {estimatedFeeData?.estimatedFee &&
+      {/* {estimatedFeeData?.estimatedFee &&
         estimatedFeeData?.error !== true &&
         !isEstimatedFeeLoading && (
           <div className="text-sm text-gray-500 mt-2 text-right">
@@ -324,7 +325,7 @@ function Swap() {
             {parseFloat(estimatedFeeData.estimatedFee).toFixed(3) + " "}
             USDC
           </div>
-        )}
+        )} */}
       <Button
         variant="contained"
         sx={{ textTransform: "none", mt: 2, borderRadius: "1rem" }}
