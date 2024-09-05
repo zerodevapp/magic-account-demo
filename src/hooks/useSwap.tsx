@@ -6,7 +6,7 @@ import { getTradeTransactions } from "../services/uniswap/TradeService";
 import { Token } from "@uniswap/sdk-core";
 
 interface UseSwapParams {
-  onSuccess: () => void;
+  onSuccess: (userOpHash: string) => void;
 }
 
 export function useSwap({ onSuccess }: UseSwapParams) {
@@ -75,7 +75,7 @@ export function useSwap({ onSuccess }: UseSwapParams) {
     if (callStatusData?.status === "CONFIRMED" && isTransitioning && !mutation.isPending) {
       refetchCallStatus();
       setIsTransitioning(false);
-      onSuccess?.();
+      onSuccess?.(mutation.data as string);
     }
   }, [callStatusData?.status, onSuccess, refetchCallStatus]);
 

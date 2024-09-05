@@ -6,7 +6,7 @@ import { AaveSupplyEncodeService, RawTransaction } from "../services/AaveSupplyS
 import { parseUnits } from "viem";
 
 interface UseAaveSupplyParams {
-  onSuccess: () => void;
+  onSuccess: (userOpHash: string) => void;
 }
 
 export function useAaveSupply({ onSuccess }: UseAaveSupplyParams) {
@@ -77,9 +77,9 @@ export function useAaveSupply({ onSuccess }: UseAaveSupplyParams) {
     if (callStatusData?.status === "CONFIRMED" && isTransitioning && !mutation.isPending) {
       refetchCallStatus();
       setIsTransitioning(false);
-      onSuccess?.();
+      onSuccess?.(mutation.data as string);
     }
-  }, [callStatusData?.status, onSuccess, refetchCallStatus, mutation.isPending, isTransitioning]);
+  }, [callStatusData?.status, onSuccess, refetchCallStatus, mutation.isPending, isTransitioning, mutation.data]);
 
   return {
     supply: mutation.mutate,
