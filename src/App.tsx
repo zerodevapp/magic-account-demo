@@ -25,15 +25,15 @@ function App() {
           <AppSection />
         </div>
       </main>
-      <Modal open={isModalOpen} handleClose={() => setIsModalOpen(false)}>
+      <Modal open={isModalOpen} handleClose={() => setIsModalOpen(false)} showPoweredBy={false}>
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4">
-            Welcome to ZeroDev's Magic Account demo
+            ZeroDev Magic Account Demo
           </h2>
           <ol className="space-y-4 inline-block text-left py-4">
             {[
               "Connect or create a Magic Account",
-              "Deposit USDC into the Magic Account",
+              "Deposit USDC into the Magic Account, from any chain!",
               "Use your chain-abstracted USDC on any app, on any chain!",
             ].map((step, index) => (
               <li key={index} className="flex items-center space-x-3">
