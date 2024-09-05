@@ -69,7 +69,7 @@ export function SupplyModalProvider({
         </div>,
         {
           position: "bottom-right",
-          autoClose: false,
+          autoClose: 15000,
         }
       );
     },

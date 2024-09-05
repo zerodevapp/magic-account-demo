@@ -70,7 +70,7 @@ function Swap() {
         </div>,
         {
           position: "bottom-right",
-          autoClose: false,
+          autoClose: 15000,
         }
       );
       setSellAmount("");
