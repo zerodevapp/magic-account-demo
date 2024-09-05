@@ -14,7 +14,9 @@ import TokenBalances from "./TokenBalances";
 function Account() {
   const { address, isConnected } = useAccount();
   const { isEnabledOnCurrentChain } = useEnableCab();
-  const { data: cabBalance } = useReadCab();
+  const { data: cabBalance } = useReadCab({
+    refetchInterval: 1000,
+  });
   const { isEnablingCab } = useAutoEnableCab();
 
   const [tooltipOpen, setTooltipOpen] = useState(false);
