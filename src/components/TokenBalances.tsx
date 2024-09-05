@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useTokenBalancesForChains } from "../hooks/useTokenBalancesForChains";
 import { chains } from "../services/uniswap/constants";
 import { useAccount } from "wagmi";

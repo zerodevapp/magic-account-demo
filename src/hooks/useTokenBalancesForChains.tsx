@@ -4,9 +4,10 @@ import { getTokenBalances } from "../services/uniswap/BalanceService";
 
 export function useTokenBalancesForChains(address?: string) {
   const queries = useQueries({
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queries: Object.entries(chains).map(([chainId, _]) => ({
       queryKey: ["tokenBalances", address, chainId],
-      queryFn: () => getTokenBalances(address, Number(chainId)),
+      queryFn: () => getTokenBalances(address ?? "", Number(chainId)),
       enabled: !!address,
     })),
   });
