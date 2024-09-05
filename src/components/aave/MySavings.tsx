@@ -2,6 +2,7 @@ import { useAccount } from "wagmi";
 import { chainNameFromId, getChainIcon } from "../../utils/utils";
 import { useAavePositions, Position } from "../../hooks/useAavePositions";
 import { useAaveYieldInfo } from "../../hooks/useAaveYieldInfo";
+import { Button } from "@mui/material";
 
 function MySavings2() {
   const { address } = useAccount();
@@ -33,12 +34,13 @@ function MySavings2() {
           </p>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-          <button
+          <Button
             onClick={withdrawAll}
-            className="block rounded-md bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            variant="contained"
+            sx={{ textTransform: 'none' }}
           >
             Withdraw all
-          </button>
+          </Button>
         </div>
       </div>
       <div className="mt-8 flow-root">

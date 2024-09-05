@@ -4,6 +4,7 @@ import { useSupplyModal } from "../../providers/SupplyModalProvider";
 import { useReadCab } from "@magic-account/wagmi";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
+import { Button } from "@mui/material";
 
 interface UsdcSaveModalProps {
   usdcYields: YieldInfo[];
@@ -84,13 +85,14 @@ function UsdcSaveWidget({ usdcYields }: UsdcSaveModalProps) {
             ))}
           </dl>
           <div className="mt-4 flex justify-center">
-            <button
+            <Button
               onClick={handleSaveClick}
               disabled={!isConnected}
-              className="py-2 px-4 bg-blue-600 text-white rounded-md flex items-center justify-center hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="contained"
+              sx={{ textTransform: 'none' }}
             >
               Supply
-            </button>
+            </Button>
           </div>
         </div>
       </div>

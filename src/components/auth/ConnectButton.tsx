@@ -11,6 +11,7 @@ export function ConnectButton() {
     <Button
       onClick={isConnected ? () => disconnect() : openModal}
       variant="contained"
+      sx={{ textTransform: 'none' }}
     >
       {isConnected ? "Disconnect" : "Connect"}
     </Button>

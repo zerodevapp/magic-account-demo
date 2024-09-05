@@ -20,6 +20,7 @@ import { useSwap } from "../../hooks/useSwap";
 import { useUniswapQuote } from "../../hooks/useUniswapQuote";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useTokenBalancesForChains } from "../../hooks/useTokenBalancesForChains";
+import { Button } from "@mui/material";
 
 function Swap() {
   const notifications = useNotifications();
@@ -30,7 +31,7 @@ function Swap() {
   const { data: cabBalance } = useReadCab();
   const [isTokenSelectOpen, setIsTokenSelectOpen] = useState(false);
   const [selectedToken, setSelectedToken] = useState("WETH");
-  const { refetch: refetchBalances } = useTokenBalancesForChains(address);  
+  const { refetch: refetchBalances } = useTokenBalancesForChains(address);
 
   const {
     data: swapTokenBalance,
@@ -107,7 +108,7 @@ function Swap() {
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-lg p-4 w-[464px]">
+    <div className="bg-white rounded-3xl shadow-lg p-4 w-[464px] w-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="bg-gray-100 text-gray-700 rounded-md px-3 py-2 text-sm font-medium">
           Swap
@@ -214,10 +215,10 @@ function Swap() {
               {isBalanceLoading
                 ? "Loading..."
                 : balanceError
-                ? "Error fetching balance"
-                : `${parseFloat(swapTokenBalance || "0").toFixed(
-                    6
-                  )} ${selectedToken}`}
+                  ? "Error fetching balance"
+                  : `${parseFloat(swapTokenBalance || "0").toFixed(
+                      6
+                    )} ${selectedToken}`}
             </span>
           </div>
           <div className="flex items-center">
@@ -259,19 +260,21 @@ function Swap() {
         </div>
       </div>
 
-      <button
-        className="w-full bg-blue-500 text-white font-semibold py-4 rounded-2xl mt-4 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+      <Button
+        variant="contained"
+        sx={{ textTransform: "none", mt: 2, borderRadius: "1rem" }}
+        fullWidth
         onClick={handleSwap}
         disabled={!isConnected || !sellAmount || isLoading}
       >
         {!isConnected
           ? "Connect Account"
           : isLoading
-          ? "Swapping..."
-          : sellAmount
-          ? "Swap"
-          : "Enter an amount"}
-      </button>
+            ? "Swapping..."
+            : sellAmount
+              ? "Swap"
+              : "Enter an amount"}
+      </Button>
       <TokenSelectModal
         open={isTokenSelectOpen}
         onClose={() => setIsTokenSelectOpen(false)}

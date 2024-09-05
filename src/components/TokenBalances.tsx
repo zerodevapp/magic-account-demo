@@ -4,7 +4,7 @@ import { chains } from "../services/uniswap/constants";
 import { useAccount } from "wagmi";
 import { tokens } from "../utils/utils";
 
-const TokenBalances: React.FC = () => {
+function TokenBalances() {
   const [selectedToken, setSelectedToken] = useState<string>(tokens[0].symbol);
   const { address } = useAccount();
 
@@ -16,20 +16,26 @@ const TokenBalances: React.FC = () => {
 
   const tokenTotals = useMemo(() => {
     if (!balances) return {};
-    return tokens.reduce((acc, { symbol }) => {
-      acc[symbol] = Object.values(balances).reduce(
-        (sum, chainBalances) => sum + (chainBalances[symbol] || 0),
-        0
-      );
-      return acc;
-    }, {} as Record<string, number>);
+    return tokens.reduce(
+      (acc, { symbol }) => {
+        acc[symbol] = Object.values(balances).reduce(
+          (sum, chainBalances) => sum + (chainBalances[symbol] || 0),
+          0
+        );
+        return acc;
+      },
+      {} as Record<string, number>
+    );
   }, [balances]);
+
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 max-w-md mx-auto w-full">
-      <h2 className="text-2xl font-bold mb-4 text-center">Token Balances</h2>
-      <div className="mb-4">
+    <div className="bg-slate-100 shadow-lg p-6 mx-auto w-full">
+      <h3 className="text-xl font-semibold leading-7 text-gray-900">
+        Token Balances
+      </h3>
+      <div className="my-2">
         <select
-          className="w-full p-2 border rounded-md"
+          className="w-full p-2 border rounded-md text-sm"
           value={selectedToken}
           onChange={(e) => setSelectedToken(e.target.value)}
         >
@@ -44,15 +50,15 @@ const TokenBalances: React.FC = () => {
         </select>
       </div>
 
-      <div className="space-y-4">
-        <div className="flex justify-between font-semibold text-gray-600">
+      <div className="space-y-3">
+        <div className="flex justify-between text-sm font-medium text-gray-500">
           <span>Chain</span>
           <span>Amount</span>
         </div>
         {isLoading ? (
-          <div>Loading...</div>
+          <div className="text-sm">Loading...</div>
         ) : error ? (
-          <div>Error fetching balances</div>
+          <div className="text-sm">Error fetching balances</div>
         ) : (
           Object.entries(chains).map(([chainId, { chain }]) => (
             <ChainBalance
@@ -65,18 +71,21 @@ const TokenBalances: React.FC = () => {
       </div>
     </div>
   );
-};
+}
 
-const ChainBalance: React.FC<{ chainName: string; balance: number }> = ({
+function ChainBalance({
   chainName,
   balance,
-}) => {
+}: {
+  chainName: string;
+  balance: number;
+}) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between text-sm">
       <span>{chainName}</span>
-      <span className="font-mono">{balance.toFixed(6)}</span>
+      <span>{balance.toFixed(6)}</span>
     </div>
   );
-};
+}
 
 export default TokenBalances;

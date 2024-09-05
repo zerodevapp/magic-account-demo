@@ -26,7 +26,7 @@ function App() {
         <div className="flex flex-col md:flex-row items-start justify-start w-full gap-4">
           <div className="w-full md:max-w-[32%] flex flex-col gap-4">
             <Account />
-            {isConnected && <TokenBalances />}
+            {/* {isConnected && <TokenBalances />} */}
           </div>
           <AppSection />
         </div>
