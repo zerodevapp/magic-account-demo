@@ -47,6 +47,7 @@ function Swap() {
     onSuccess: () => {
       notifications.show("Swap Successful!", {
         severity: "success",
+        autoHideDuration: 10000,
       });
       setSellAmount("");
       refetchBalance();

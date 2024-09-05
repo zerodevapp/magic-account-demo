@@ -51,6 +51,7 @@ export function SupplyModalProvider({ children }: { children: React.ReactNode })
       closeModal();
       notifications.show("Supply Successful!", {
         severity: "success",
+        autoHideDuration: 10000,
       });
     },
   });

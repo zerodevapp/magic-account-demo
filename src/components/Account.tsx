@@ -44,9 +44,9 @@ function Account() {
         <h3 className="text-xl font-semibold leading-7 text-gray-900">
           Magic Account
         </h3>
-        <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
+        {/* <p className="mt-1 max-w-2xl text-sm leading-6 text-gray-500">
           Your account details and balances.
-        </p>
+        </p> */}
       </div>
       <div className="border-t border-gray-100">
         <dl className="divide-y divide-gray-100">
