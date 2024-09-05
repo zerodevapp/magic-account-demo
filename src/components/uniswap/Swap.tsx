@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ChevronDownIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
 import usdcLogo from "../../assets/usdc.png";
 import { Token } from "@uniswap/sdk-core";
@@ -21,6 +21,9 @@ import { useUniswapQuote } from "../../hooks/useUniswapQuote";
 import { toast } from "react-toastify";
 import { useTokenBalancesForChains } from "../../hooks/useTokenBalancesForChains";
 import { Button } from "@mui/material";
+import { useEstimateFeesCab } from "@magic-account/wagmi";
+
+type Call = { to: `0x${string}`; value: bigint; data: `0x${string}` };
 
 function Swap() {
   const [sellAmount, setSellAmount] = useState<string>("");
@@ -31,6 +34,12 @@ function Swap() {
   const [isTokenSelectOpen, setIsTokenSelectOpen] = useState(false);
   const [selectedToken, setSelectedToken] = useState("WETH");
   const { refetch: refetchBalances } = useTokenBalancesForChains(address);
+  const [calls, setCalls] = useState<Call[] | undefined>(undefined);
+  const { data: estimatedFeeData, isLoading: isEstimatedFeeLoading } =
+    useEstimateFeesCab(calls, undefined, {
+      enabled: !!calls && calls.length > 0,
+    });
+  console.log(estimatedFeeData);
 
   const {
     data: swapTokenBalance,
@@ -42,13 +51,11 @@ function Swap() {
     selectedChainId
   );
 
-  const { swap, isLoading } = useSwap({
+  const { swap, isLoading, buildCalls } = useSwap({
     onSuccess: (userOpHash: string) => {
       toast.success(
         <div className="flex flex-col items-start space-y-2 text-sm">
-          <span className="font-semibold text-green-600">
-            Swap successful!
-          </span>
+          <span className="font-semibold text-green-600">Swap successful!</span>
           <div className="flex items-center space-x-2">
             <span>View details:</span>
             <a
@@ -86,6 +93,32 @@ function Swap() {
       ),
     };
   }, [selectedChainId, selectedToken]);
+
+  useEffect(() => {
+    const updateCalls = async () => {
+      if (!sellAmount || !address) {
+        setCalls(undefined);
+        return;
+      }
+
+      try {
+        console.log({ sellAmount });
+        const newCalls = await buildCalls(
+          tokens.USDC,
+          tokens[selectedToken as keyof typeof tokens],
+          sellAmount,
+          selectedChainId
+        );
+        setCalls(newCalls);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        console.log({ error });
+        // do nothing
+      }
+    };
+
+    updateCalls();
+  }, [sellAmount, selectedToken, selectedChainId, address, buildCalls, tokens]);
 
   const { data: quoteAmount, isLoading: isQuoteLoading } = useUniswapQuote({
     sellAmount,
@@ -196,7 +229,12 @@ function Swap() {
             <input
               type="number"
               value={sellAmount}
-              onChange={(e) => setSellAmount(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "" || parseFloat(value) >= 0) {
+                  setSellAmount(value);
+                }
+              }}
               className="bg-transparent text-3xl font-semibold w-full outline-none border-none focus:border-none active:border-none focus:outline-none focus:ring-0"
               placeholder="0"
               style={{
@@ -233,10 +271,10 @@ function Swap() {
               {isBalanceLoading
                 ? "Loading..."
                 : balanceError
-                  ? "Error fetching balance"
-                  : `${parseFloat(swapTokenBalance || "0").toFixed(
-                      6
-                    )} ${selectedToken}`}
+                ? "Error fetching balance"
+                : `${parseFloat(swapTokenBalance || "0").toFixed(
+                    6
+                  )} ${selectedToken}`}
             </span>
           </div>
           <div className="flex items-center">
@@ -278,6 +316,15 @@ function Swap() {
         </div>
       </div>
 
+      {estimatedFeeData?.estimatedFee &&
+        estimatedFeeData?.error !== true &&
+        !isEstimatedFeeLoading && (
+          <div className="text-sm text-gray-500 mt-2 text-right">
+            Estimated fee:{" "}
+            {parseFloat(estimatedFeeData.estimatedFee).toFixed(3) + " "}
+            USDC
+          </div>
+        )}
       <Button
         variant="contained"
         sx={{ textTransform: "none", mt: 2, borderRadius: "1rem" }}
@@ -288,10 +335,10 @@ function Swap() {
         {!isConnected
           ? "Connect Account"
           : isLoading
-            ? "Swapping..."
-            : sellAmount
-              ? "Swap"
-              : "Enter an amount"}
+          ? "Swapping..."
+          : sellAmount
+          ? "Swap"
+          : "Enter an amount"}
       </Button>
       <TokenSelectModal
         open={isTokenSelectOpen}
