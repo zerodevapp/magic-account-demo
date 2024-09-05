@@ -40,7 +40,7 @@ function Account() {
 
   return (
     <div className="bg-white shadow-md rounded-lg p-6 md:mt-[70px] w-full">
-      <h2 className="text-2xl font-bold mb-4">Magic Account</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">Magic Account</h2>
 
       <div className="mb-4">
         <label className="text-sm font-medium text-gray-600">Address</label>
@@ -58,7 +58,9 @@ function Account() {
       </div>
 
       <div className="mb-4">
-        <label className="text-sm font-medium text-gray-600">Chain abstraction enabled</label>
+        <label className="text-sm font-medium text-gray-600">
+          Chain abstraction enabled
+        </label>
         <p
           className={`mt-1 font-semibold ${
             isEnabledOnCurrentChain("USDC") ? "text-green-600" : "text-red-600"

@@ -18,8 +18,11 @@ import { tokens as tokenData } from "../../utils/utils";
 import { useTokenBalance } from "../../hooks/useTokenBalance";
 import { useSwap } from "../../hooks/useSwap";
 import { useUniswapQuote } from "../../hooks/useUniswapQuote";
+import { useNotifications } from "@toolpad/core/useNotifications";
+import { useTokenBalancesForChains } from "../../hooks/useTokenBalancesForChains";
 
 function Swap() {
+  const notifications = useNotifications();
   const [sellAmount, setSellAmount] = useState<string>("");
   const { address, chainId: isConnected } = useAccount();
   const [selectedChainId, setSelectedChainId] = useState(Number(arbitrum.id));
@@ -27,6 +30,7 @@ function Swap() {
   const { data: cabBalance } = useReadCab();
   const [isTokenSelectOpen, setIsTokenSelectOpen] = useState(false);
   const [selectedToken, setSelectedToken] = useState("WETH");
+  const { refetch: refetchBalances } = useTokenBalancesForChains(address);  
 
   const {
     data: swapTokenBalance,
@@ -40,8 +44,12 @@ function Swap() {
 
   const { swap, isLoading } = useSwap({
     onSuccess: () => {
+      notifications.show("Swap Successful!", {
+        severity: "success",
+      });
       setSellAmount("");
       refetchBalance();
+      refetchBalances();
     },
   });
 

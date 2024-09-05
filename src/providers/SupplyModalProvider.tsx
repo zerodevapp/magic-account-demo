@@ -6,6 +6,7 @@ import { useAccount } from "wagmi";
 import { useAaveSupply } from "../hooks/useAaveSupply";
 import { useAavePositions } from "../hooks/useAavePositions";
 import { useReadCab } from "@magic-account/wagmi";
+import { useNotifications } from '@toolpad/core/useNotifications';
 
 interface SupplyModalContextType {
   isOpen: boolean;
@@ -32,6 +33,7 @@ const SupplyModalContext = createContext<
 >(undefined);
 
 export function SupplyModalProvider({ children }: { children: React.ReactNode }) {
+  const notifications = useNotifications();
   const { address } = useAccount();
   const [isOpen, setIsOpen] = useState(false);
   const [modalProps, setModalProps] = useState<SupplyModalProps | null>(
@@ -47,6 +49,9 @@ export function SupplyModalProvider({ children }: { children: React.ReactNode })
         refetchCab();
       }, 500);
       closeModal();
+      notifications.show("Supply Successful!", {
+        severity: "success",
+      });
     },
   });
 

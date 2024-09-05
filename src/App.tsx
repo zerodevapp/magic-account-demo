@@ -3,12 +3,17 @@ import Header from "./components/Header";
 import "./App.css";
 import Account from "./components/Account";
 import AppSection from "./components/AppSection";
+import { useAccount } from "wagmi";
 import Modal from "./components/Modal";
 import { BackgroundImage } from "./components/BackgroundImages";
+import { useTokenBalances } from "./hooks/useTokenBalances";
+import TokenBalances from "./components/TokenBalances";
 
 function App() {
+  const { isConnected } = useAccount();
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const { data: tokenBalances, isLoading } = useTokenBalances("0x012d578942AFB68Df62596AB399925548E14800f", 10);
+  console.log(tokenBalances, isLoading);
   useEffect(() => {
     setIsModalOpen(true);
   }, []);
@@ -19,8 +24,9 @@ function App() {
       <BackgroundImage className="absolute inset-0 -z-10" />
       <main className="flex-grow container mx-auto px-4 py-8 relative">
         <div className="flex flex-col md:flex-row items-start justify-start w-full gap-4">
-          <div className="w-full md:max-w-[32%]">
+          <div className="w-full md:max-w-[32%] flex flex-col gap-4">
             <Account />
+            {isConnected && <TokenBalances />}
           </div>
           <AppSection />
         </div>

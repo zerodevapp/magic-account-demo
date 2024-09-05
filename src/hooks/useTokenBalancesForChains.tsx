@@ -1,0 +1,32 @@
+import { useQueries } from "@tanstack/react-query";
+import { chains } from "../services/uniswap/constants";
+import { getTokenBalances } from "../services/uniswap/BalanceService";
+
+export function useTokenBalancesForChains(address: string) {
+  const queries = useQueries({
+    queries: Object.entries(chains).map(([chainId, _]) => ({
+      queryKey: ["tokenBalances", address, chainId],
+      queryFn: () => getTokenBalances(address, Number(chainId)),
+      enabled: !!address,
+    })),
+  });
+
+  const isLoading = queries.some((query) => query.isLoading);
+  const error = queries.find((query) => query.error)?.error || null;
+
+  const data = queries.reduce(
+    (acc, query, index) => {
+      if (query.data) {
+        acc[Number(Object.keys(chains)[index])] = query.data;
+      }
+      return acc;
+    },
+    {} as Record<number, Record<string, number>>
+  );
+
+  const refetchAll = () => {
+    queries.forEach((query) => query.refetch());
+  };
+
+  return { data, isLoading, error, refetch: refetchAll };
+}
