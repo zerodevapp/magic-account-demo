@@ -5,12 +5,10 @@ import Account from "./components/Account";
 import AppSection from "./components/AppSection";
 import Modal from "./components/Modal";
 import { BackgroundImage } from "./components/BackgroundImages";
-import { useTokenBalances } from "./hooks/useTokenBalances";
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { data: tokenBalances, isLoading } = useTokenBalances("0x012d578942AFB68Df62596AB399925548E14800f", 10);
-  console.log(tokenBalances, isLoading);
+
   useEffect(() => {
     setIsModalOpen(true);
   }, []);
