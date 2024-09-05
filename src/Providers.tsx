@@ -6,7 +6,7 @@ import { injected } from "wagmi/connectors";
 import { polygon, arbitrum, base, optimism } from "wagmi/chains";
 import { passkeyConnector, wrapEOAConnector } from "@magic-account/wagmi";
 import { SupplyModalProvider } from "./providers/SupplyModalProvider";
-import { NotificationsProvider } from "@toolpad/core/useNotifications";
+import { ToastContainer } from "react-toastify";
 
 export default function Providers({ children }: { children: ReactNode }) {
   const config = createConfig({
@@ -25,11 +25,10 @@ export default function Providers({ children }: { children: ReactNode }) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <NotificationsProvider>
-          <AuthModalProvider>
-            <SupplyModalProvider>{children}</SupplyModalProvider>
-          </AuthModalProvider>
-        </NotificationsProvider>
+        <ToastContainer />
+        <AuthModalProvider>
+          <SupplyModalProvider>{children}</SupplyModalProvider>
+        </AuthModalProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );

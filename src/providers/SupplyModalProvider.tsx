@@ -6,7 +6,7 @@ import { useAccount } from "wagmi";
 import { useAaveSupply } from "../hooks/useAaveSupply";
 import { useAavePositions } from "../hooks/useAavePositions";
 import { useReadCab } from "@magic-account/wagmi";
-import { useNotifications } from '@toolpad/core/useNotifications';
+import { toast } from "react-toastify";
 
 interface SupplyModalContextType {
   isOpen: boolean;
@@ -28,17 +28,18 @@ interface SupplyModalProps {
   };
 }
 
-const SupplyModalContext = createContext<
-  SupplyModalContextType | undefined
->(undefined);
+const SupplyModalContext = createContext<SupplyModalContextType | undefined>(
+  undefined
+);
 
-export function SupplyModalProvider({ children }: { children: React.ReactNode }) {
-  const notifications = useNotifications();
+export function SupplyModalProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { address } = useAccount();
   const [isOpen, setIsOpen] = useState(false);
-  const [modalProps, setModalProps] = useState<SupplyModalProps | null>(
-    null
-  );
+  const [modalProps, setModalProps] = useState<SupplyModalProps | null>(null);
 
   const { refetch: refetchPositions } = useAavePositions();
   const { refetch: refetchCab } = useReadCab();
@@ -49,9 +50,8 @@ export function SupplyModalProvider({ children }: { children: React.ReactNode })
         refetchCab();
       }, 500);
       closeModal();
-      notifications.show("Supply Successful!", {
-        severity: "success",
-        autoHideDuration: 10000,
+      toast.success("Supply successful", {
+        position: "bottom-right",
       });
     },
   });
@@ -76,9 +76,7 @@ export function SupplyModalProvider({ children }: { children: React.ReactNode })
   };
 
   return (
-    <SupplyModalContext.Provider
-      value={{ isOpen, openModal, closeModal }}
-    >
+    <SupplyModalContext.Provider value={{ isOpen, openModal, closeModal }}>
       {children}
       <Modal open={isOpen} handleClose={closeModal} showPoweredBy={false}>
         {modalProps && (
@@ -99,14 +97,12 @@ export function SupplyModalProvider({ children }: { children: React.ReactNode })
       </Modal>
     </SupplyModalContext.Provider>
   );
-};
+}
 
 export const useSupplyModal = () => {
   const context = useContext(SupplyModalContext);
   if (context === undefined) {
-    throw new Error(
-      "useSupplyModal must be used within a SupplyModalProvider"
-    );
+    throw new Error("useSupplyModal must be used within a SupplyModalProvider");
   }
   return context;
 };

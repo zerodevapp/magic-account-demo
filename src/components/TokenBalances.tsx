@@ -29,7 +29,7 @@ function TokenBalances() {
   }, [balances]);
 
   return (
-    <div className="bg-slate-100 shadow-lg p-6 mx-auto w-full">
+    <div className="bg-white shadow-lg p-6 mx-auto w-full">
       <h3 className="text-xl font-semibold leading-7 text-gray-900">
         Token Balances
       </h3>
@@ -39,7 +39,7 @@ function TokenBalances() {
           value={selectedToken}
           onChange={(e) => setSelectedToken(e.target.value)}
         >
-          {tokens.map(({ symbol }) => (
+          {tokens.filter(token => token.symbol !== 'USDC').map(({ symbol }) => (
             <option key={symbol} value={symbol}>
               {symbol}{" "}
               {isLoading

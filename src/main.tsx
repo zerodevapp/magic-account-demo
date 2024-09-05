@@ -4,6 +4,7 @@ import Providers from "./Providers.tsx";
 import App from "./App.tsx";
 import "./index.css";
 import "./polyfills.ts";
+import 'react-toastify/dist/ReactToastify.css';
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

@@ -18,12 +18,11 @@ import { tokens as tokenData } from "../../utils/utils";
 import { useTokenBalance } from "../../hooks/useTokenBalance";
 import { useSwap } from "../../hooks/useSwap";
 import { useUniswapQuote } from "../../hooks/useUniswapQuote";
-import { useNotifications } from "@toolpad/core/useNotifications";
+import { toast } from "react-toastify";
 import { useTokenBalancesForChains } from "../../hooks/useTokenBalancesForChains";
 import { Button } from "@mui/material";
 
 function Swap() {
-  const notifications = useNotifications();
   const [sellAmount, setSellAmount] = useState<string>("");
   const { address, chainId: isConnected } = useAccount();
   const [selectedChainId, setSelectedChainId] = useState(Number(arbitrum.id));
@@ -45,9 +44,8 @@ function Swap() {
 
   const { swap, isLoading } = useSwap({
     onSuccess: () => {
-      notifications.show("Swap Successful!", {
-        severity: "success",
-        autoHideDuration: 10000,
+      toast.success("Swap successful", {
+        position: "bottom-right",
       });
       setSellAmount("");
       refetchBalance();
