@@ -259,10 +259,10 @@ function UsdcSaveModal({
             </div>
             ({maxBalance})
           </div>
-          <Alert
+          {/* <Alert
             text="Max available amount is smaller than your balance to account for transaction costs."
             showDetails={false}
-          />
+          /> */}
         </div>
 
         <div className="grid grid-cols-2 items-center justify-end space-x-3 pt-4">
