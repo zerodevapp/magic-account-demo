@@ -17,7 +17,7 @@ export function useTokenBalancesForChains(address?: string) {
 
   const data = queries.reduce(
     (acc, query, index) => {
-      if (query.data) {
+      if (query.data && Object.keys(query.data).length > 0) {
         acc[Number(Object.keys(chains)[index])] = query.data;
       }
       return acc;
