@@ -25,26 +25,18 @@ const TokenSelectModal: React.FC<TokenSelectModalProps> = ({
           .map((token) => {
             const isWLDDisabled =
               token.symbol === "WLD" && selectedChainId !== 10;
+
+            if (isWLDDisabled) return null; // Hide WLD button if disabled
+
             return (
-              <Tooltip
-                key={token.symbol}
-                title={isWLDDisabled ? "WLD is only available on Optimism" : ""}
-                arrow
-              >
+              <Tooltip key={token.symbol} title="" arrow>
                 <div>
                   <button
-                    className={`flex items-center justify-start p-3 rounded-xl transition-colors w-full ${
-                      isWLDDisabled
-                        ? "bg-gray-200 cursor-not-allowed opacity-50"
-                        : "bg-gray-100 hover:bg-gray-200"
-                    }`}
+                    className="flex items-center justify-start p-3 rounded-xl transition-colors w-full bg-gray-100 hover:bg-gray-200"
                     onClick={() => {
-                      if (!isWLDDisabled) {
-                        onSelect(token.symbol);
-                        onClose();
-                      }
+                      onSelect(token.symbol);
+                      onClose();
                     }}
-                    disabled={isWLDDisabled}
                   >
                     <img
                       src={token.logo}
