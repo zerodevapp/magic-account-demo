@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { Transition } from "@headlessui/react";
 import { tokens, getChainIcon } from "../../utils/utils";
 import { useAaveYieldInfo } from "../../hooks/useAaveYieldInfo";
-import Alert from "./Alert";
 import { chains } from "../../utils/utils";
 interface UsdcSaveModalProps {
   isVisible: boolean;
