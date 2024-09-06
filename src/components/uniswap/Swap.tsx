@@ -155,6 +155,10 @@ function Swap() {
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
   const setNewChain = async (chainId: number) => {
+    if (selectedToken === 'WLD' && chainId !== 10) {
+      setSelectedToken('WETH');
+      setSellAmount('');
+    }
     setSelectedChainId(chainId);
     toggleDropdown();
   };
@@ -345,6 +349,7 @@ function Swap() {
         open={isTokenSelectOpen}
         onClose={() => setIsTokenSelectOpen(false)}
         onSelect={handleTokenSelect}
+        selectedChainId={selectedChainId}
       />
     </div>
   );

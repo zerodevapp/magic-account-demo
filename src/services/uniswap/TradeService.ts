@@ -29,7 +29,11 @@ export async function getTradeTransactions(
 
     const amountIn = fromReadableAmount(amount, tokenIn.decimals).toString()
     const quote = await getOutputQuote(swapRoute, amount, tokenIn, chainId);
-
+    const amountt =  CurrencyAmount.fromRawAmount(
+        tokenOut,
+        quote.toString()
+    )
+    console.log(amountt)
     const uncheckedTrade = Trade.createUncheckedTrade({
         route: swapRoute,
         inputAmount: CurrencyAmount.fromRawAmount(
@@ -63,7 +67,7 @@ export async function getTradeTransactions(
     return [tokenApprovalTx, transaction];
 }
 
-async function getPoolInfo(tokenIn: Token, tokenOut: Token, chainId: number) {
+export async function getPoolInfo(tokenIn: Token, tokenOut: Token, chainId: number) {
     const currentPoolAddress = computePoolAddress({
         factoryAddress: chains[chainId as keyof typeof chains].poolFactoryAddress,
         tokenA: tokenIn,
@@ -101,7 +105,7 @@ async function getPoolInfo(tokenIn: Token, tokenOut: Token, chainId: number) {
     };
 }
 
-async function getOutputQuote(route: Route<Currency, Currency>, amountIn: string, tokenIn: Token, chainId: number) {
+export async function getOutputQuote(route: Route<Currency, Currency>, amountIn: string, tokenIn: Token, chainId: number) {
     const publicClient = getPublicClient(chainId);
     if (!publicClient) {
         throw new Error('Public client required to get pool state');

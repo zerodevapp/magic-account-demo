@@ -8,6 +8,7 @@ import daiLogo from "../assets/dai.png";
 import usdtLogo from "../assets/usdt.png";
 import wbtcLogo from "../assets/wbtc.svg";
 import usdcLogo from "../assets/usdc.png";
+import wldLogo from "../assets/worldcoin.svg";
 // import pepeLogo from "../assets/pepe.jpeg";
 
 
@@ -53,6 +54,7 @@ export const tokens: Token[] = [
   { symbol: "WBTC", logo: wbtcLogo },
   { symbol: "USDC", logo: usdcLogo },
   // { symbol: "PEPE", logo: pepeLogo },
+  { symbol: "WLD", logo: wldLogo },
 ];
 
 export const chains = [
