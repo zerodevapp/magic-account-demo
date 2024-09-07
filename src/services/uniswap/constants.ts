@@ -78,6 +78,7 @@ export const tokenDecimals = {
     WBTC: 8,
     USDT: 6,
     DAI: 18,
+    WLD: 18,
 };
 
 
