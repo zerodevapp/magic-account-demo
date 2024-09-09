@@ -36,7 +36,7 @@ function UsdcSaveModal({
   onSubmit,
 }: UsdcSaveModalProps) {
   const { register, handleSubmit, setValue, watch } = useForm();
-  const { data: yieldInfo } = useAaveYieldInfo(tokenSymbol as 'USDC');
+  const { data: yieldInfo } = useAaveYieldInfo(tokenSymbol as "USDC");
   const [selectedChain, setSelectedChain] = useState({
     name: chainName,
     id: chainId,
@@ -140,9 +140,7 @@ function UsdcSaveModal({
                   <span className="font-semibold text-xs text-slate-600">
                     Select Aave Market
                   </span>
-                  <span>
-                    {selectedChain.name} (ID: {selectedChain.id})
-                  </span>
+                  <span>{selectedChain.name}</span>
                 </div>
               </div>
               <div className="flex flex-row items-center px-4 text-sm py-3 bg-slate-50 hover:bg-slate-100 rounded-md justify-end gap-x-2">
@@ -181,9 +179,14 @@ function UsdcSaveModal({
                     <div
                       key={chain.id}
                       onClick={() => setNewChain(chain.id)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
                     >
-                      {chain.name} (ID: {chain.id})
+                      <img
+                        src={getChainIcon(chain.id) ?? ""}
+                        alt={chain.name}
+                        className="h-5 w-5 mr-2"
+                      />
+                      {chain.name}
                     </div>
                   ))}
                 </div>
