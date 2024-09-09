@@ -1,6 +1,6 @@
 import { useAccount } from "wagmi";
 import { useState } from "react";
-import { Chip, Tooltip } from "@mui/material";
+import { Tooltip } from "@mui/material";
 import { useEnableCab } from "@magic-account/wagmi";
 import useAutoEnableCab from "../../hooks/useAutoEnableCab";
 import arbitrumIcon from "../../assets/networks/arbitrum.svg";
@@ -9,6 +9,7 @@ import polygonIcon from "../../assets/networks/polygon.svg";
 import baseIcon from "../../assets/networks/base.svg";
 import TokenBalances from "../TokenBalances";
 import ChainAbstractedBalance from "./ChainAbstractedBalance";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 function Account() {
   const { address, isConnected } = useAccount();
@@ -24,7 +25,7 @@ function Account() {
   };
 
   const shortenAddress = (addr: string) => {
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+    return `${addr.slice(0, 8)}...${addr.slice(-6)}`;
   };
 
   if (!isConnected) {
@@ -47,18 +48,18 @@ function Account() {
       </div>
       <div className="border-t border-gray-100">
         <dl className="divide-y divide-gray-100">
-          <div className="px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 sm:items-center bg-slate-100">
-            <dt className="text-sm font-medium text-gray-900 sm:col-span-2">
-              Address
+          <div className="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 sm:items-center bg-slate-100">
+            <dt className="text-sm font-medium text-gray-900 flex flex-col  sm:col-span-2">
+              <span>Address</span>
+              <span className="text-sm font-normal text-gray-500">
+                {shortenAddress(address || "")}
+              </span>
             </dt>
             <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-1 sm:mt-0 sm:text-right">
               <Tooltip open={tooltipOpen} title="Copied!" placement="top" arrow>
-                <Chip
-                  label={shortenAddress(address || "")}
-                  onClick={copyAddress}
-                  color="primary"
-                  className="w-full justify-between"
-                />
+                <button onClick={copyAddress} className="ml-2">
+                  <ContentCopyIcon fontSize="small" />
+                </button>
               </Tooltip>
             </dd>
           </div>

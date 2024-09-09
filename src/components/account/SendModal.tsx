@@ -104,16 +104,6 @@ function SendModal({ open, onClose }: SendModalProps) {
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Chain
-          </label>
-          <ChainSelect
-            selectedChainId={selectedChainId}
-            onChainSelect={setSelectedChainId}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
             From
           </label>
           <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
@@ -140,6 +130,16 @@ function SendModal({ open, onClose }: SendModalProps) {
               ${cabBalance ? formatUnits(cabBalance, 6) : "0.00"}
             </span>
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Chain
+          </label>
+          <ChainSelect
+            selectedChainId={selectedChainId}
+            onChainSelect={setSelectedChainId}
+          />
         </div>
 
         <div>
