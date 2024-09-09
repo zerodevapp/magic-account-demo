@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 import { WagmiProvider, createConfig, http } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { polygon, arbitrum, base, optimism } from "wagmi/chains";
-import { passkeyConnector, wrapEOAConnector } from "@magic-account/wagmi";
+import { passkeyConnector, wrapEOAConnector, googleConnector } from "@magic-account/wagmi";
 import { SupplyModalProvider } from "./providers/SupplyModalProvider";
 import { ToastContainer } from "react-toastify";
 
@@ -17,7 +17,7 @@ export default function Providers({ children }: { children: ReactNode }) {
       [arbitrum.id]: http(),
       [polygon.id]: http(),
     },
-    connectors: [passkeyConnector(), wrapEOAConnector(injected())],
+    connectors: [passkeyConnector(), wrapEOAConnector(injected()), googleConnector()],
     multiInjectedProviderDiscovery: false,
   });
   const queryClient = new QueryClient();
