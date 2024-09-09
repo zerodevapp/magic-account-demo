@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useConnect } from "wagmi";
 import GoogleIcon from "./GoogleIcon";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
@@ -31,8 +31,8 @@ function CustomButton({
   icon,
   text,
   onClick,
-  // disabled,
-}: {
+}: // disabled,
+{
   icon: React.ReactNode;
   text: string;
   onClick: () => void;
@@ -57,11 +57,18 @@ export default function LoginOptions() {
     "google" | "passkey" | "browser"
   >();
 
+  const injectedConnector = useMemo(
+    () => connectors.find((connector) => connector.name === "Injected"),
+    [connectors]
+  );
+
+  const googleConnector = useMemo(
+    () => connectors.find((connector) => connector.name === "Google"),
+    [connectors]
+  );
+
   const handleGoogleLogin = async () => {
     try {
-      const googleConnector = connectors.find(
-        (connector) => connector.name === "Google"
-      );
       if (googleConnector) {
         await connectAsync({ connector: googleConnector });
         setLoadingType("google");
@@ -94,28 +101,28 @@ export default function LoginOptions() {
             }}
             // disabled={isPending}
           />
-          <CustomButton
-            icon={<BrowserWalletIcon />}
-            text={
-              loadingType === "browser"
-                ? "Connecting..."
-                : "Connect with Browser Wallet"
-            }
-            onClick={async () => {
-              setLoadingType("browser");
-              try {
-                await connectAsync({
-                  connector: connectors.find(
-                    (connector) => connector.name === "Injected"
-                  )!,
-                });
-              } catch (error) {
-                console.error("Error connecting with Browser Wallet:", error);
-                setLoadingType(undefined);
+          {injectedConnector && (
+            <CustomButton
+              icon={<BrowserWalletIcon />}
+              text={
+                loadingType === "browser"
+                  ? "Connecting..."
+                  : "Connect with Browser Wallet"
               }
-            }}
-            // disabled={isPending}
-          />
+              onClick={async () => {
+                setLoadingType("browser");
+                try {
+                  await connectAsync({
+                    connector: injectedConnector,
+                  });
+                } catch (error) {
+                  console.error("Error connecting with Browser Wallet:", error);
+                  setLoadingType(undefined);
+                }
+              }}
+              // disabled={isPending}
+            />
+          )}
         </div>
       )}
       {showPasskeyLogin && <PasskeyLogin />}
