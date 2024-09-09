@@ -1,8 +1,9 @@
 import { Address, PublicClient, getContract, formatUnits } from 'viem';
-import { getPublicClient } from './uniswap/constants';
-import { mcUSDC } from './tokens.constants';
+import { getPublicClient } from '../uniswap/constants';
+import { mcUSDC } from './utils';
 import { aaveV3PoolAbi } from './generated';
 import { polygon, arbitrum, optimism, base } from 'viem/chains';
+import { aaveV3PoolAddresses } from './utils';
 
 export interface YieldInfo {
     symbol: string;
@@ -28,15 +29,7 @@ export type ChainRpcInfo = {
 
 const ABI = aaveV3PoolAbi;
 
-type AaveV3PoolAddresses = { [chainId: number]: Address };
 type ChainNames = { [chainId: number]: string };
-
-export const aaveV3PoolAddresses: AaveV3PoolAddresses = {
-    10: '0x794a61358D6845594F94dc1DB02A252b5b4814aD',
-    42161: '0x794a61358D6845594F94dc1DB02A252b5b4814aD',
-    137: '0x794a61358D6845594F94dc1DB02A252b5b4814aD',
-    8453: '0xA238Dd80C259a72e81d7e4664a9801593F98d1c5',
-};
 
 export class AaveV3YieldService {
     private clients: Map<number, PublicClient> = new Map();

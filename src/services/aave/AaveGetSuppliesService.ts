@@ -1,7 +1,7 @@
 import { Address, encodeFunctionData, parseAbi, PublicClient } from 'viem';
 import { Chain, optimism, arbitrum, polygon, base } from 'viem/chains';
-import { getPublicClient } from './uniswap/constants';
-import { mcUSDC } from './tokens.constants';
+import { getPublicClient } from '../uniswap/constants';
+import { mcUSDC } from './utils';
 
 interface SuppliedPosition {
   chainId: number;
@@ -64,7 +64,7 @@ export class AaveGetSuppliesService {
     }
 
     const aTokenAddress = token === 'USDC' ? aTokenInfo.usdcAToken : aTokenInfo.usdtAToken;
-    
+
     if (!aTokenAddress) {
       console.error(`No aToken address found for ${token} on chain ${mapping.chainId}`);
       return [];
@@ -100,7 +100,7 @@ export class AaveGetSuppliesService {
   }
 
   getAavePoolAddress(chainId: number): Address {
-    switch(chainId) {
+    switch (chainId) {
       case optimism.id: return '0x794a61358D6845594F94dc1DB02A252b5b4814aD';
       case base.id: return '0xA238Dd80C259a72e81d7e4664a9801593F98d1c5';
       case polygon.id: return '0x794a61358D6845594F94dc1DB02A252b5b4814aD';

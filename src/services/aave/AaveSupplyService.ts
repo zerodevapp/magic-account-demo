@@ -1,5 +1,5 @@
 import { Address, encodeFunctionData } from 'viem';
-import { aaveV3PoolAddresses } from './AaveV3YieldService';
+import { aaveV3PoolAddresses, getPoolAddress } from './utils';
 
 export class AaveSupplyEncodeService {
   // Aave V3 Pool ABI (only the supply function)
@@ -65,14 +65,6 @@ export class AaveSupplyEncodeService {
     });
   }
 
-  getPoolAddress(chainId: number): Address {
-    const poolAddress = aaveV3PoolAddresses[chainId];
-    if (!poolAddress) {
-      throw new Error(`Unsupported chain ID: ${chainId}`);
-    }
-    return poolAddress;
-  }
-
   encodeSupplyTxs(
     tokenAddress: Address,
     chainId: number,
@@ -86,7 +78,7 @@ export class AaveSupplyEncodeService {
     });
 
     const supplyAaveTx = rawTx({
-      to: this.getPoolAddress(chainId),
+      to: getPoolAddress(chainId),
       gasLimit: BigInt(300000),
       data: this.encodeSupplyCalldata(
         tokenAddress,
@@ -101,13 +93,12 @@ export class AaveSupplyEncodeService {
 }
 
 export interface RawTransaction {
-    to: Address;
-    value?: bigint;
-    data?: string;
-    gasLimit: bigint;
-  }
-  
-  export function rawTx(tx: RawTransaction) {
-    return tx;
-  }
-  
+  to: Address;
+  value?: bigint;
+  data?: string;
+  gasLimit: bigint;
+}
+
+export function rawTx(tx: RawTransaction) {
+  return tx;
+}

@@ -5,11 +5,13 @@ import App from "./App.tsx";
 import "./index.css";
 import "./polyfills.ts";
 import 'react-toastify/dist/ReactToastify.css';
+import { Analytics } from "@vercel/analytics/react"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Providers>
       <App />
     </Providers>
+    <Analytics />
   </StrictMode>
 );

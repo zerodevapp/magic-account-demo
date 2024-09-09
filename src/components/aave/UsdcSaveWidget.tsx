@@ -1,4 +1,4 @@
-import { YieldInfo } from "../../services/AaveV3YieldService";
+import { YieldInfo } from "../../services/aave/AaveV3YieldService";
 import usdcLogo from "../../assets/usdc.png";
 import { useSupplyModal } from "../../providers/SupplyModalProvider";
 import { useReadCab } from "@magic-account/wagmi";
@@ -89,7 +89,7 @@ function UsdcSaveWidget({ usdcYields }: UsdcSaveModalProps) {
               onClick={handleSaveClick}
               disabled={!isConnected}
               variant="contained"
-              sx={{ textTransform: 'none' }}
+              sx={{ textTransform: "none" }}
             >
               Supply
             </Button>

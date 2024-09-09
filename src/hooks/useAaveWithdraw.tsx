@@ -3,36 +3,33 @@ import { useState, useEffect } from "react";
 import { useAccount, useSwitchChain } from "wagmi";
 import { useSendCalls, useCallsStatus } from "wagmi/experimental";
 import {
-  AaveSupplyEncodeService,
-  RawTransaction,
-} from "../services/aave/AaveSupplyService";
+  AaveWithdrawService,
+} from "../services/aave/AaveWithdrawService";
 import { parseUnits } from "viem";
+import { mcUSDC } from "../services/aave/utils";
 
-interface UseAaveSupplyParams {
+interface UseAaveWithdrawParams {
   onSuccess: (userOpHash: string) => void;
 }
 
-export function useAaveSupply({ onSuccess }: UseAaveSupplyParams) {
+export function useAaveWithdraw({ onSuccess }: UseAaveWithdrawParams) {
   const { address, chainId: currentChainId } = useAccount();
   const { switchChainAsync } = useSwitchChain();
   const { sendCallsAsync, data: id } = useSendCalls();
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const aaveSupplyEncodeService = new AaveSupplyEncodeService();
+  const aaveWithdrawService = new AaveWithdrawService();
 
   const mutation = useMutation({
     mutationFn: async ({
-      tokenAddress,
       chainId,
       amount,
     }: {
-      tokenAddress: `0x${string}`;
       chainId: number;
       amount: string;
     }) => {
       if (!address) {
-        throw new Error("Wallet not connected");
+        throw new Error("No address found");
       }
-
       setIsTransitioning(true);
 
       const parsedAmount = parseUnits(amount, 6);
@@ -40,7 +37,14 @@ export function useAaveSupply({ onSuccess }: UseAaveSupplyParams) {
         throw new Error("Invalid amount");
       }
 
-      const encodedTxs = aaveSupplyEncodeService.encodeSupplyTxs(
+      const tokenInfo = mcUSDC.find(token => token.chainId === chainId);
+      if (!tokenInfo) {
+        throw new Error(`Unsupported chain ID: ${chainId}`);
+      }
+      const tokenAddress = tokenInfo.address;
+
+
+      const encodedTx = aaveWithdrawService.encodeWithdrawTx(
         tokenAddress,
         chainId,
         parsedAmount,
@@ -51,18 +55,18 @@ export function useAaveSupply({ onSuccess }: UseAaveSupplyParams) {
         await switchChainAsync({ chainId });
       }
 
-      const calls = encodedTxs.map((tx: RawTransaction) => ({
-        to: tx.to,
-        value: tx.value || BigInt(0),
-        data: tx.data || "0x",
-      }));
+      const calls = [{
+        to: encodedTx.to,
+        value: encodedTx.value || BigInt(0),
+        data: encodedTx.data || "0x",
+      }];
 
       const result = await sendCallsAsync({ calls });
-      console.log("Supply transaction posted:", result);
+      console.log("Withdraw transaction posted:", result);
       return result;
     },
     onError: (error) => {
-      console.error("Supply failed", error);
+      console.error("Withdraw failed", error);
       setIsTransitioning(false);
     },
   });
@@ -96,7 +100,7 @@ export function useAaveSupply({ onSuccess }: UseAaveSupplyParams) {
   ]);
 
   return {
-    supply: mutation.mutate,
+    withdraw: mutation.mutate,
     isLoading: mutation.isPending || isTransitioning,
     error: mutation.error,
     callStatus: callStatusData?.status,

@@ -4,7 +4,7 @@ import MySavings from "./MySavings";
 import {
   AaveV3YieldService,
   YieldInfo,
-} from "../../services/AaveV3YieldService";
+} from "../../services/aave/AaveV3YieldService";
 import { useAccount } from "wagmi";
 
 function AAVE() {
