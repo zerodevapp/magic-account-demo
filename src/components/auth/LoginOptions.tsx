@@ -8,15 +8,24 @@ import BrowserWalletIcon from "./BrowserWalletIcon";
 export default function LoginOptions() {
   const [showPasskeyLogin, setShowPasskeyLogin] = useState(false);
   const { connectors, connect, isPending } = useConnect();
+  const [loadingType, setLoadingType] = useState<
+    "google" | "passkey" | "browser"
+  >();
 
   const handleGoogleLogin = () => {
-    const googleConnector = connectors.find(
-      (connector) => connector.name === "Google"
-    );
-    if (googleConnector) {
-      connect({ connector: googleConnector });
-    } else {
-      console.error("Google connector not found");
+    setLoadingType("google");
+    try {
+      const googleConnector = connectors.find(
+        (connector) => connector.name === "Google"
+      );
+      if (googleConnector) {
+        connect({ connector: googleConnector });
+      } else {
+        console.error("Google connector not found");
+      }
+    } catch (error) {
+      console.error("Error connecting with Google:", error);
+      setLoadingType(undefined);
     }
   };
 
@@ -26,7 +35,9 @@ export default function LoginOptions() {
         <div className="w-full flex flex-col gap-2">
           <LoginButton
             icon={<GoogleIcon />}
-            text="Google"
+            text={
+              loadingType === "google" ? "Connecting..." : "Connect with Google"
+            }
             iconColor="text-black"
             onClick={handleGoogleLogin}
             disabled={isPending}
@@ -41,9 +52,25 @@ export default function LoginOptions() {
           />
           <LoginButton
             icon={<BrowserWalletIcon />}
-            text="Connect with Browser Wallet"
+            text={
+              loadingType === "browser"
+                ? "Connecting..."
+                : "Connect with Browser Wallet"
+            }
             iconColor="text-orange-500"
-            onClick={() => connect({ connector: connectors.find(connector => connector.name === 'Injected')! })}
+            onClick={() => {
+              setLoadingType("browser");
+              try {
+                connect({
+                  connector: connectors.find(
+                    (connector) => connector.name === "Injected"
+                  )!,
+                });
+              } catch (error) {
+                console.error("Error connecting with Browser Wallet:", error);
+                setLoadingType(undefined);
+              }
+            }}
             disabled={isPending}
           />
         </div>
@@ -61,11 +88,24 @@ type LoginButtonProps = {
   disabled?: boolean;
 };
 
-function LoginButton({ icon, text, iconColor, onClick, disabled }: LoginButtonProps) {
+function LoginButton({
+  icon,
+  text,
+  iconColor,
+  onClick,
+  disabled,
+}: LoginButtonProps) {
+  const handleInteraction = (event: React.MouseEvent | React.TouchEvent) => {
+    event.preventDefault();
+    if (!disabled && onClick) {
+      onClick();
+    }
+  };
+
   return (
     <button
-      className={`flex w-full items-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent`}
-      onClick={onClick}
+      className={`flex w-full items-center gap-3 rounded-md bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent active:bg-gray-100 transition-colors`}
+      onClick={handleInteraction}
       disabled={disabled}
     >
       <div className={`mr-3 ${iconColor}`}>{icon}</div>
