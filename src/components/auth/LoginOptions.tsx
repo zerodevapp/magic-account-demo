@@ -106,7 +106,6 @@ function LoginButton({
     <button
       className={`flex w-full items-center gap-3 rounded-md bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent active:bg-gray-100 transition-colors`}
       onClick={handleInteraction}
-      disabled={disabled}
     >
       <div className={`mr-3 ${iconColor}`}>{icon}</div>
       <span className="text-sm font-semibold leading-6">{text}</span>
