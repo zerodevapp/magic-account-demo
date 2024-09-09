@@ -1398,10 +1398,10 @@
   dependencies:
     "@lit-labs/ssr-dom-shim" "^1.0.0"
 
-"@magic-account/wagmi@0.0.25-test.3":
-  version "0.0.25-test.3"
-  resolved "https://registry.yarnpkg.com/@magic-account/wagmi/-/wagmi-0.0.25-test.3.tgz#dba6b0a6b283d81feb5a0754d5ecf8a06213de21"
-  integrity sha512-5XanZ9aFFS+7ijTO4cGM8DCuWSIjKNnVMYtltIfaYy1mtdg2wl0iVQcBni3YhWMFoxfz0PCpDO0JtEt2nFl9Iw==
+"@magic-account/wagmi@0.0.26":
+  version "0.0.26"
+  resolved "https://registry.yarnpkg.com/@magic-account/wagmi/-/wagmi-0.0.26.tgz#1b7a01dc6c123b8fef9ae0fa32eaa9eb7040cf2a"
+  integrity sha512-W4Ns5BrBnXYNN6uI9xwpq/9QAJ8Zq8g8/5Y+Q149OGUjYCJ3FWA0IGYUKpwE+Dneu90s8gLgt75/g5lSpsO+mg==
   dependencies:
     "@noble/hashes" "^1.4.0"
     "@turnkey/sdk-browser" "^1.2.3"
