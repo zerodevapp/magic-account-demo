@@ -122,36 +122,3 @@ export default function LoginOptions() {
     </div>
   );
 }
-
-type LoginButtonProps = {
-  icon: React.ReactNode;
-  text: string;
-  iconColor: string;
-  onClick?: () => void;
-  disabled?: boolean;
-};
-
-function LoginButton({
-  icon,
-  text,
-  iconColor,
-  onClick,
-  disabled,
-}: LoginButtonProps) {
-  const handleInteraction = (event: React.MouseEvent | React.TouchEvent) => {
-    event.preventDefault();
-    if (!disabled && onClick) {
-      onClick();
-    }
-  };
-
-  return (
-    <button
-      className={`flex w-full items-center gap-3 rounded-md bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent active:bg-gray-100 transition-colors`}
-      onClick={handleInteraction}
-    >
-      <div className={`mr-3 ${iconColor}`}>{icon}</div>
-      <span className="text-sm font-semibold leading-6">{text}</span>
-    </button>
-  );
-}
