@@ -101,10 +101,10 @@ export default function LoginOptions() {
                 ? "Connecting..."
                 : "Connect with Browser Wallet"
             }
-            onClick={() => {
+            onClick={async () => {
               setLoadingType("browser");
               try {
-                connect({
+                await connectAsync({
                   connector: connectors.find(
                     (connector) => connector.name === "Injected"
                   )!,
