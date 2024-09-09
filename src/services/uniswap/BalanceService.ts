@@ -45,6 +45,7 @@ export async function getTokenBalances(address: string, chainId: number): Promis
     const fetchURL = chain.rpcUrl;
 
     const tokenAddressesArray = Object.entries(tokenAddresses[chainId as keyof typeof tokenAddresses])
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .filter(([token, _]) => !(
             (chainId === 8453 && token === 'USDT') || // Ignore USDT on Base (chainId 8453)
             token === 'USDC' // Ignore USDC on all chains
@@ -77,7 +78,6 @@ export async function getTokenBalances(address: string, chainId: number): Promis
             const tokenSymbol = Object.keys(tokenAddresses[chainId as keyof typeof tokenAddresses]).find(
                 key => (tokenAddresses[chainId as keyof typeof tokenAddresses] as Record<string, string>)[key].toLowerCase() === balance.contractAddress.toLowerCase()
             );
-    
             if (tokenSymbol) {
                 const decimals = tokenDecimals[tokenSymbol as keyof typeof tokenDecimals];
                 const formattedBalance = parseInt(balance.tokenBalance) / Math.pow(10, decimals);

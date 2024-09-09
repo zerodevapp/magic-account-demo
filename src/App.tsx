@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import "./App.css";
-import Account from "./components/Account";
+import Account from "./components/account/Account";
 import AppSection from "./components/AppSection";
 import Modal from "./components/Modal";
 import { BackgroundImage } from "./components/BackgroundImages";
@@ -25,7 +25,11 @@ function App() {
           <AppSection />
         </div>
       </main>
-      <Modal open={isModalOpen} handleClose={() => setIsModalOpen(false)} showPoweredBy={false}>
+      <Modal
+        open={isModalOpen}
+        handleClose={() => setIsModalOpen(false)}
+        showPoweredBy={false}
+      >
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4">
             ZeroDev Magic Account Demo

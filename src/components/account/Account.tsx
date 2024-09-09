@@ -1,22 +1,18 @@
 import { useAccount } from "wagmi";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Chip, Tooltip } from "@mui/material";
-import { useReadCab, useEnableCab } from "@magic-account/wagmi";
-import useAutoEnableCab from "../hooks/useAutoEnableCab";
-import { formatUnits } from "viem";
-import arbitrumIcon from "../assets/networks/arbitrum.svg";
-import optimismIcon from "../assets/networks/optimism.svg";
-import polygonIcon from "../assets/networks/polygon.svg";
-import baseIcon from "../assets/networks/base.svg";
-import { tokens } from "../utils/utils";
-import TokenBalances from "./TokenBalances";
+import { useEnableCab } from "@magic-account/wagmi";
+import useAutoEnableCab from "../../hooks/useAutoEnableCab";
+import arbitrumIcon from "../../assets/networks/arbitrum.svg";
+import optimismIcon from "../../assets/networks/optimism.svg";
+import polygonIcon from "../../assets/networks/polygon.svg";
+import baseIcon from "../../assets/networks/base.svg";
+import TokenBalances from "../TokenBalances";
+import ChainAbstractedBalance from "./ChainAbstractedBalance";
 
 function Account() {
   const { address, isConnected } = useAccount();
   const { isEnabledOnCurrentChain } = useEnableCab();
-  const { data: cabBalance } = useReadCab({
-    refetchInterval: 1000,
-  });
   const { isEnablingCab } = useAutoEnableCab();
 
   const [tooltipOpen, setTooltipOpen] = useState(false);
@@ -31,10 +27,6 @@ function Account() {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
 
-  const usdcToken = useMemo(
-    () => tokens.find((token) => token.symbol === "USDC"),
-    []
-  );
   if (!isConnected) {
     return (
       <div className="bg-white shadow-md rounded-lg p-6 flex items-center justify-center h-64 md:mt-[70px] w-full">
@@ -51,19 +43,7 @@ function Account() {
         <h3 className="text-xl font-semibold leading-7 text-gray-900">
           Magic Account
         </h3>
-        <div className="mt-4 bg-slate-100 p-4 rounded-md">
-          <p className="text-sm font-medium">Chain-abstracted balance (CAB)</p>
-          <div className="flex items-end">
-            {" "}
-            <p className="text-3xl font-bold">
-              {cabBalance ? formatUnits(cabBalance, 6) : "0.00"}
-            </p>
-            <span className="text-lg ml-2 flex items-center gap-1">
-              <img src={usdcToken?.logo} alt="USDC" className="w-4 h-4 ml-1" />
-              USDC
-            </span>
-          </div>
-        </div>
+        <ChainAbstractedBalance />
       </div>
       <div className="border-t border-gray-100">
         <dl className="divide-y divide-gray-100">

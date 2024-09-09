@@ -6,12 +6,9 @@ import { arbitrum } from "viem/chains";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 import {
-  chains,
   tokenAddresses,
   tokenDecimals,
 } from "../../services/uniswap/constants";
-import { Transition } from "@headlessui/react";
-import { getChainIcon } from "../../utils/utils";
 import { useReadCab } from "@magic-account/wagmi";
 import TokenSelectModal from "./TokenSelectModal";
 import { tokens as tokenData } from "../../utils/utils";
@@ -21,8 +18,7 @@ import { useUniswapQuote } from "../../hooks/useUniswapQuote";
 import { toast } from "react-toastify";
 import { useTokenBalancesForChains } from "../../hooks/useTokenBalancesForChains";
 import { Button } from "@mui/material";
-
-// type Call = { to: `0x${string}`; value: bigint; data: `0x${string}` };
+import ChainSelect from "../ChainSelect";
 
 function Swap() {
   const [sellAmount, setSellAmount] = useState<string>("");
@@ -87,40 +83,6 @@ function Swap() {
     };
   }, [selectedChainId, selectedToken]);
 
-  // const debouncedUpdateCalls = useCallback(
-  //   debounce(async () => {
-  //     if (!sellAmount || !address) {
-  //       setCalls(undefined);
-  //       return;
-  //     }
-
-  //     try {
-  //       console.log({ sellAmount });
-  //       const newCalls = await buildCalls(
-  //         tokens.USDC,
-  //         tokens[selectedToken as keyof typeof tokens],
-  //         sellAmount,
-  //         selectedChainId
-  //       );
-  //       console.log({ newCalls });
-  //       setCalls(newCalls);
-  //     } catch (error) {
-  //       console.log({ error });
-  //       // do nothing
-  //     }
-  //   }, 300),
-  //   [sellAmount, selectedToken, selectedChainId, address, buildCalls, tokens]
-  // );
-
-  // useEffect(() => {
-  //   debouncedUpdateCalls();
-
-  //   // Cleanup function to cancel the debounce on unmount
-  //   return () => {
-  //     debouncedUpdateCalls.cancel();
-  //   };
-  // }, [sellAmount, selectedToken, selectedChainId, address, debouncedUpdateCalls]);
-
   const { data: quoteAmount, isLoading: isQuoteLoading } = useUniswapQuote({
     sellAmount,
     tokenIn: tokens.USDC,
@@ -164,59 +126,17 @@ function Swap() {
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-lg p-4 w-[464px] w-full">
+    <div className="bg-white rounded-3xl shadow-lg p-4 w-full">
       <div className="flex justify-between items-center mb-4">
         <h2 className="bg-gray-100 text-gray-700 rounded-md px-3 py-2 text-sm font-medium">
           Swap
         </h2>
-        <div className="relative">
-          <div
-            onClick={toggleDropdown}
-            className="flex items-center cursor-pointer bg-gray-100 rounded-2xl py-2 px-3 hover:bg-gray-200"
-          >
-            <img
-              src={getChainIcon(selectedChainId) ?? ""}
-              alt={chains[selectedChainId as keyof typeof chains].chain.name}
-              className="h-5 w-5 mr-2"
-            />
-            <span className="font-semibold mr-2">
-              {chains[selectedChainId as keyof typeof chains].chain.name}
-            </span>
-            <ChevronDownIcon className="h-4 w-4" />
-          </div>
-
-          <Transition
-            show={isDropdownOpen}
-            enter="transition ease-out duration-100"
-            enterFrom="transform opacity-0 scale-95"
-            enterTo="transform opacity-100 scale-100"
-            leave="transition ease-in duration-75"
-            leaveFrom="transform opacity-100 scale-100"
-            leaveTo="transform opacity-0 scale-95"
-          >
-            <div className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-              <div className="py-1">
-                {Object.entries(chains).map(([chainId, chain]) => {
-                  if (Number(chainId) === 8453) return null;
-                  return (
-                    <div
-                      key={chainId}
-                      onClick={() => setNewChain(Number(chainId))}
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
-                    >
-                      <img
-                        src={getChainIcon(Number(chainId)) ?? ""}
-                        alt={chain.chain.name}
-                        className="h-5 w-5 mr-2"
-                      />
-                      {chain.chain.name}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </Transition>
-        </div>
+        <ChainSelect
+          selectedChainId={selectedChainId}
+          onChainSelect={setNewChain}
+          className="w-56"
+          excludeBase={true}
+        />
       </div>
 
       <div className="space-y-4 relative">
