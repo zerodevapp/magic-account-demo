@@ -58,13 +58,13 @@ export default function LoginOptions() {
   >();
 
   const handleGoogleLogin = () => {
-    setLoadingType("google");
     try {
       const googleConnector = connectors.find(
         (connector) => connector.name === "Google"
       );
       if (googleConnector) {
         connect({ connector: googleConnector });
+        setLoadingType("google");
       } else {
         console.error("Google connector not found");
       }
