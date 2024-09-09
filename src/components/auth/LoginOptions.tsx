@@ -52,18 +52,18 @@ function CustomButton({
 
 export default function LoginOptions() {
   const [showPasskeyLogin, setShowPasskeyLogin] = useState(false);
-  const { connectors, connect, isPending } = useConnect();
+  const { connectors, connectAsync, isPending } = useConnect();
   const [loadingType, setLoadingType] = useState<
     "google" | "passkey" | "browser"
   >();
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     try {
       const googleConnector = connectors.find(
         (connector) => connector.name === "Google"
       );
       if (googleConnector) {
-        connect({ connector: googleConnector });
+        await connectAsync({ connector: googleConnector });
         setLoadingType("google");
       } else {
         console.error("Google connector not found");
