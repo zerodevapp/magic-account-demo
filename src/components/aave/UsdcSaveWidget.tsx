@@ -1,7 +1,7 @@
 import { YieldInfo } from "../../services/aave/AaveV3YieldService";
 import usdcLogo from "../../assets/usdc.png";
 import { useSupplyModal } from "../../providers/SupplyModalProvider";
-import { useReadCab } from "@magic-account/wagmi";
+import { useReadCab } from "@zerodev/magic-account";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 import { Button } from "@mui/material";

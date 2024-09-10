@@ -1,7 +1,7 @@
 import { useAccount } from "wagmi";
 import { useState } from "react";
 import { Tooltip } from "@mui/material";
-import { useEnableCab } from "@magic-account/wagmi";
+import { useEnableCab } from "@zerodev/magic-account";
 import useAutoEnableCab from "../../hooks/useAutoEnableCab";
 import arbitrumIcon from "../../assets/networks/arbitrum.svg";
 import optimismIcon from "../../assets/networks/optimism.svg";

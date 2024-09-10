@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useReadCab } from "@magic-account/wagmi";
+import { useReadCab } from "@zerodev/magic-account";
 import { formatUnits } from "viem";
 import { useMemo } from "react";
 import { tokens } from "../../utils/utils";
