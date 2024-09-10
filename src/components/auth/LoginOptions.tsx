@@ -86,19 +86,19 @@ export default function LoginOptions() {
       {!showPasskeyLogin && (
         <div className="w-full flex flex-col">
           <CustomButton
-            icon={<GoogleIcon />}
-            text={
-              loadingType === "google" ? "Connecting..." : "Connect with Google"
-            }
-            onClick={handleGoogleLogin}
-            // disabled={isPending}
-          />
-          <CustomButton
             icon={<FingerprintIcon />}
             text="Sign in with Passkey"
             onClick={() => {
               setShowPasskeyLogin(true);
             }}
+            // disabled={isPending}
+          />
+          <CustomButton
+            icon={<GoogleIcon />}
+            text={
+              loadingType === "google" ? "Connecting..." : "Connect with Google"
+            }
+            onClick={handleGoogleLogin}
             // disabled={isPending}
           />
           {injectedConnector && (
