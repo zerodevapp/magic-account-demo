@@ -45,7 +45,7 @@ function UsdcSaveWidget({ usdcYields }: UsdcSaveModalProps) {
               </h2>
             </div>
             <p className="mt-2 text-lg leading-8 text-gray-600">
-              Compare APYs across different chains
+              Supply to the highest-APY vault -- regardless of chain
             </p>
           </div>
           <dl className="mt-4 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center sm:grid-cols-2 lg:grid-cols-4">

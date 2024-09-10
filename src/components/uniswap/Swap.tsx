@@ -117,9 +117,9 @@ function Swap() {
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
   const setNewChain = async (chainId: number) => {
-    if (selectedToken === 'WLD' && chainId !== 10) {
-      setSelectedToken('WETH');
-      setSellAmount('');
+    if (selectedToken === "WLD" && chainId !== 10) {
+      setSelectedToken("WETH");
+      setSellAmount("");
     }
     setSelectedChainId(chainId);
     toggleDropdown();
@@ -128,8 +128,8 @@ function Swap() {
   return (
     <div className="bg-white rounded-3xl shadow-lg p-4 w-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="bg-gray-100 text-gray-700 rounded-md px-3 py-2 text-sm font-medium">
-          Swap
+        <h2 className="bg-gradient-to-r from-orange-100 via-pink-100 to-purple-100 text-gray-700 rounded-md px-3 py-2 text-sm font-medium">
+          Swap to any tokens on any chain
         </h2>
         <ChainSelect
           selectedChainId={selectedChainId}
