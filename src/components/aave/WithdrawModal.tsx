@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { useAaveWithdraw } from "../../hooks/useAaveWithdraw";
 import { Position } from "../../hooks/useAavePositions";
 import { chainNameFromId, getChainIcon } from "../../utils/utils";
-import { useReadCab } from "@magic-account/wagmi";
+import { useReadCab } from "@zerodev/magic-account";
 import { useAavePositions } from "../../hooks/useAavePositions";
 
 interface WithdrawModalProps {

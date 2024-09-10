@@ -1,28 +1,27 @@
-
-import { useState } from 'react';
-import Button from '@mui/material/Button';
-import { usePasskey } from '@magic-account/wagmi';
+import { useState } from "react";
+import Button from "@mui/material/Button";
+import { usePasskey } from "@zerodev/magic-account";
 
 export default function PasskeyLogin() {
-  const [isLoggingIn, setIsLoggingIn] = useState(false)
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { connectRegister, connectLogin } = usePasskey();
 
-  const handleLogin = async (type: 'LOGIN' | 'REGISTER') => {
+  const handleLogin = async (type: "LOGIN" | "REGISTER") => {
     if (isLoggingIn) return;
-    setIsLoggingIn(true)
+    setIsLoggingIn(true);
 
     try {
-        if (type === 'LOGIN') {
-            await connectLogin('Magic Account Demo');
-        } else {
-            await connectRegister('Magic Account Demo');
-        }
+      if (type === "LOGIN") {
+        await connectLogin("Magic Account Demo");
+      } else {
+        await connectRegister("Magic Account Demo");
+      }
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
     } finally {
       setIsLoggingIn(false);
     }
-  }
+  };
 
   return (
     <div className="w-full flex flex-col gap-2">
@@ -36,16 +35,13 @@ export default function PasskeyLogin() {
         size="small"
       /> */}
       <Button
-        onClick={() => handleLogin('REGISTER')}
+        onClick={() => handleLogin("REGISTER")}
         disabled={isLoggingIn}
-        variant='contained'
+        variant="contained"
       >
         Create Wallet
       </Button>
-      <Button
-        onClick={() => handleLogin('LOGIN')}
-        disabled={isLoggingIn}
-      >
+      <Button onClick={() => handleLogin("LOGIN")} disabled={isLoggingIn}>
         I already have a wallet
       </Button>
     </div>

@@ -9,7 +9,7 @@ import {
   tokenAddresses,
   tokenDecimals,
 } from "../../services/uniswap/constants";
-import { useReadCab } from "@magic-account/wagmi";
+import { useReadCab } from "@zerodev/magic-account";
 import TokenSelectModal from "./TokenSelectModal";
 import { tokens as tokenData } from "../../utils/utils";
 import { useTokenBalance } from "../../hooks/useTokenBalance";

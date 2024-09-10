@@ -1,5 +1,5 @@
 import { useAccount } from "wagmi";
-import { useEnableCab } from "@magic-account/wagmi";
+import { useEnableCab } from "@zerodev/magic-account";
 import { useCallback, useEffect, useState } from "react";
 
 export default function useAutoEnableCab() {
@@ -23,10 +23,21 @@ export default function useAutoEnableCab() {
   }, [isEnabledOnCurrentChain, enableCab]);
 
   useEffect(() => {
-    if (isConnected && !isEnabledOnCurrentChain("USDC") && !isPending && !isEnablingCab) {
+    if (
+      isConnected &&
+      !isEnabledOnCurrentChain("USDC") &&
+      !isPending &&
+      !isEnablingCab
+    ) {
       register();
     }
-  }, [isConnected, register, isEnabledOnCurrentChain, isPending, isEnablingCab]);
+  }, [
+    isConnected,
+    register,
+    isEnabledOnCurrentChain,
+    isPending,
+    isEnablingCab,
+  ]);
 
   return { isEnablingCab };
 }

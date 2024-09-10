@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import Modal from "../Modal";
 import { tokens } from "../../utils/utils";
-import { useReadCab } from "@magic-account/wagmi";
+import { useReadCab } from "@zerodev/magic-account";
 import { formatUnits, isAddress } from "viem";
 import ChainSelect from "../ChainSelect";
 import { arbitrum } from "viem/chains";

@@ -5,7 +5,7 @@ import UsdcSaveModal from "../components/aave/UsdcSaveModal";
 import { useAccount } from "wagmi";
 import { useAaveSupply } from "../hooks/useAaveSupply";
 import { useAavePositions } from "../hooks/useAavePositions";
-import { useReadCab } from "@magic-account/wagmi";
+import { useReadCab } from "@zerodev/magic-account";
 import { toast } from "react-toastify";
 
 interface SupplyModalContextType {
