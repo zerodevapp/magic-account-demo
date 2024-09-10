@@ -3523,10 +3523,10 @@
   resolved "https://registry.yarnpkg.com/@zerodev/ecdsa-validator/-/ecdsa-validator-5.3.2.tgz#8a6cd38b498bcad93d2f13c0f541cc711fe5609b"
   integrity sha512-fEEmox5V5jG/0PVFjY4L4QIACc7y90x1uXWHGxUpFPaVCwKNDsEMdh4uLO3Pu1EsNs7qtl5RMrjnkUmJdHL9eg==
 
-"@zerodev/magic-account@0.0.27-test.0":
-  version "0.0.27-test.0"
-  resolved "https://registry.yarnpkg.com/@zerodev/magic-account/-/magic-account-0.0.27-test.0.tgz#57710e6c2ada936d45eae07f0c7a709934692c5f"
-  integrity sha512-crbJkMapvDgkQxE+K5eS3K5kXWo/zhDBktmv5w1D2LciPchpPhwWmPYBNlak+zIWif78UTE3VKv4l+u2270fjQ==
+"@zerodev/magic-account@0.0.28":
+  version "0.0.28"
+  resolved "https://registry.yarnpkg.com/@zerodev/magic-account/-/magic-account-0.0.28.tgz#d26fec6997745b3e4a4d7cfcd4e52c0a96553733"
+  integrity sha512-KV65khDmgWx0rLD22Lyp2noOP0hrs21/07Gp6NxPjJVyRg0ArVQBXDy91PcovYHpxzzKXqVJaO1YzTiktxxOpQ==
   dependencies:
     "@noble/hashes" "^1.4.0"
     "@turnkey/sdk-browser" "^1.2.3"
