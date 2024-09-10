@@ -2,11 +2,12 @@ import React from "react";
 import Modal from "../Modal";
 import { tokens } from "../../utils/utils";
 import Tooltip from "@mui/material/Tooltip";
+import ChainSelect from "../ChainSelect";
 
 interface TokenSelectModalProps {
   open: boolean;
   onClose: () => void;
-  onSelect: (token: string) => void;
+  onSelect: (token: string, chainId: number) => void;
   selectedChainId: number;
 }
 
@@ -16,17 +17,25 @@ const TokenSelectModal: React.FC<TokenSelectModalProps> = ({
   onSelect,
   selectedChainId,
 }) => {
+  const [currentChainId, setCurrentChainId] = React.useState(selectedChainId);
+
   return (
     <Modal open={open} handleClose={onClose} showPoweredBy={false}>
-      <h2 className="text-xl font-semibold mb-4">Select a token</h2>
+      <h2 className="text-xl font-semibold mb-4">Select a token and chain</h2>
+      <ChainSelect
+        selectedChainId={currentChainId}
+        onChainSelect={setCurrentChainId}
+        className="w-full mb-4"
+        excludeBase={true}
+      />
       <div className="grid grid-cols-2 gap-4">
         {tokens
           .filter((token) => token.symbol !== "USDC")
           .map((token) => {
             const isWLDDisabled =
-              token.symbol === "WLD" && selectedChainId !== 10;
+              token.symbol === "WLD" && currentChainId !== 10;
 
-            if (isWLDDisabled) return null; // Hide WLD button if disabled
+            if (isWLDDisabled) return null;
 
             return (
               <Tooltip key={token.symbol} title="" arrow>
@@ -34,7 +43,7 @@ const TokenSelectModal: React.FC<TokenSelectModalProps> = ({
                   <button
                     className="flex items-center justify-start p-3 rounded-xl transition-colors w-full bg-gray-100 hover:bg-gray-200"
                     onClick={() => {
-                      onSelect(token.symbol);
+                      onSelect(token.symbol, currentChainId);
                       onClose();
                     }}
                   >

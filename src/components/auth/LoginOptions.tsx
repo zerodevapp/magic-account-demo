@@ -31,18 +31,19 @@ function CustomButton({
   icon,
   text,
   onClick,
-}: // disabled,
+  disabled,
+}:
 {
   icon: React.ReactNode;
   text: string;
   onClick: () => void;
-  // disabled?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <StyledButton
       variant="outlined"
       onClick={onClick}
-      // disabled={disabled}
+      disabled={disabled}
       startIcon={icon}
     >
       {text}
@@ -52,7 +53,7 @@ function CustomButton({
 
 export default function LoginOptions() {
   const [showPasskeyLogin, setShowPasskeyLogin] = useState(false);
-  const { connectors, connectAsync } = useConnect();
+  const { connectors, connectAsync, isPending } = useConnect();
   const [loadingType, setLoadingType] = useState<
     "google" | "passkey" | "browser"
   >();
@@ -70,8 +71,8 @@ export default function LoginOptions() {
   const handleGoogleLogin = async () => {
     try {
       if (googleConnector) {
-        await connectAsync({ connector: googleConnector });
         setLoadingType("google");
+        await connectAsync({ connector: googleConnector });
       } else {
         console.error("Google connector not found");
       }
@@ -91,7 +92,7 @@ export default function LoginOptions() {
             onClick={() => {
               setShowPasskeyLogin(true);
             }}
-            // disabled={isPending}
+            disabled={isPending}
           />
           <CustomButton
             icon={<GoogleIcon />}
@@ -99,7 +100,7 @@ export default function LoginOptions() {
               loadingType === "google" ? "Connecting..." : "Connect with Google"
             }
             onClick={handleGoogleLogin}
-            // disabled={isPending}
+            disabled={isPending}
           />
           {injectedConnector && (
             <CustomButton
@@ -120,7 +121,7 @@ export default function LoginOptions() {
                   setLoadingType(undefined);
                 }
               }}
-              // disabled={isPending}
+              disabled={isPending}
             />
           )}
         </div>

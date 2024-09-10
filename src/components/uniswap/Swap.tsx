@@ -18,13 +18,11 @@ import { useUniswapQuote } from "../../hooks/useUniswapQuote";
 import { toast } from "react-toastify";
 import { useTokenBalancesForChains } from "../../hooks/useTokenBalancesForChains";
 import { Button } from "@mui/material";
-import ChainSelect from "../ChainSelect";
 
 function Swap() {
   const [sellAmount, setSellAmount] = useState<string>("");
   const { address, chainId: isConnected } = useAccount();
   const [selectedChainId, setSelectedChainId] = useState(Number(arbitrum.id));
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { data: cabBalance } = useReadCab();
   const [isTokenSelectOpen, setIsTokenSelectOpen] = useState(false);
   const [selectedToken, setSelectedToken] = useState("WETH");
@@ -91,8 +89,13 @@ function Swap() {
     chainId: selectedChainId,
   });
 
-  const handleTokenSelect = (token: string) => {
+  const handleTokenSelect = (token: string, chainId: number) => {
+    if (selectedToken === "WLD" && chainId !== 10) {
+      setSelectedToken("WETH");
+      setSellAmount("");
+    }
     setSelectedToken(token);
+    setSelectedChainId(chainId);
   };
 
   const handleSwap = async () => {
@@ -114,29 +117,12 @@ function Swap() {
     }
   };
 
-  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
-
-  const setNewChain = async (chainId: number) => {
-    if (selectedToken === "WLD" && chainId !== 10) {
-      setSelectedToken("WETH");
-      setSellAmount("");
-    }
-    setSelectedChainId(chainId);
-    toggleDropdown();
-  };
-
   return (
     <div className="bg-white rounded-3xl shadow-lg p-4 w-full">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-center items-center mb-4">
         <h2 className="bg-gradient-to-r from-orange-100 via-pink-100 to-purple-100 text-gray-700 rounded-md px-3 py-2 text-sm font-medium">
           Swap to any tokens on any chain
         </h2>
-        <ChainSelect
-          selectedChainId={selectedChainId}
-          onChainSelect={setNewChain}
-          className="w-56"
-          excludeBase={true}
-        />
       </div>
 
       <div className="space-y-4 relative">
@@ -218,38 +204,31 @@ function Swap() {
               }}
             />
             <button
-              className="flex items-center cursor-pointer bg-white rounded-2xl py-2 px-3 hover:bg-gray-200 w-44 justify-between"
+              className="flex items-center cursor-pointer bg-white rounded-2xl py-2 px-3 hover:bg-gray-200 min-w-[140px] justify-between"
               onClick={() => setIsTokenSelectOpen(true)}
             >
-              <img
-                src={
-                  tokenData.find((token) => token.symbol === selectedToken)
-                    ?.logo
-                }
-                alt={selectedToken}
-                className="h-6 w-6 mr-2 rounded-full"
-              />
-              <span className="font-semibold">{selectedToken}</span>
+              <div className="flex items-center">
+                <img
+                  src={
+                    tokenData.find((token) => token.symbol === selectedToken)
+                      ?.logo
+                  }
+                  alt={selectedToken}
+                  className="h-6 w-6 mr-2 rounded-full"
+                />
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold text-sm">{selectedToken}</span>
+                  <span className="text-xs text-gray-500">
+                    {getChainName(selectedChainId)}
+                  </span>
+                </div>
+              </div>
               <ChevronDownIcon className="h-4 w-4 ml-2" />
             </button>
           </div>
-          {/* {quoteAmount && (
-            <div className="text-sm text-gray-500 mt-1">
-              ${(parseFloat(quoteAmount) * 2450).toFixed(2)}
-            </div>
-          )} */}
         </div>
       </div>
 
-      {/* {estimatedFeeData?.estimatedFee &&
-        estimatedFeeData?.error !== true &&
-        !isEstimatedFeeLoading && (
-          <div className="text-sm text-gray-500 mt-2 text-right">
-            Estimated fee:{" "}
-            {parseFloat(estimatedFeeData.estimatedFee).toFixed(3) + " "}
-            USDC
-          </div>
-        )} */}
       <Button
         variant="contained"
         sx={{ textTransform: "none", mt: 2, borderRadius: "1rem" }}
@@ -273,6 +252,19 @@ function Swap() {
       />
     </div>
   );
+}
+
+function getChainName(chainId: number): string {
+  switch (chainId) {
+    case 42161:
+      return "Arbitrum";
+    case 10:
+      return "Optimism";
+    case 137:
+      return "Polygon";
+    default:
+      return "Unknown";
+  }
 }
 
 export default Swap;
