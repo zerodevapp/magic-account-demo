@@ -7,6 +7,7 @@ import { ConnectButton } from "./auth/ConnectButton";
 function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const linkStyles = "relative font-semibold text-sm leading-6 text-[#0A1524] hover:text-[#0A1524] transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-[#2f6fce] after:to-[#63bdcc] after:transition-all after:duration-300 hover:after:w-full whitespace-nowrap"
   return (
     <header className="bg-white shadow-md">
       <nav className="mx-auto flex max-w-7xl items-center justify-between p-4 lg:px-8">
@@ -30,10 +31,10 @@ function Header() {
             <Bars3Icon className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-x-12">
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-x-6">
           <a
             href="https://magicaccount.io/"
-            className="relative font-semibold text-sm leading-6 text-[#0A1524] hover:text-[#0A1524] transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-[#2f6fce] after:to-[#63bdcc] after:transition-all after:duration-300 hover:after:w-full"
+            className={linkStyles}
           >
             Home
           </a>
@@ -41,7 +42,7 @@ function Header() {
             href="https://docs.zerodev.app/magic-account"
             target="_blank"
             rel="noopener noreferrer"
-            className="relative font-semibold text-sm leading-6 text-[#0A1524] hover:text-[#0A1524] transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-[#2f6fce] after:to-[#63bdcc] after:transition-all after:duration-300 hover:after:w-full"
+            className={linkStyles}
           >
             Docs
           </a>
@@ -49,7 +50,7 @@ function Header() {
             href="https://github.com/zerodevapp/magic-account-demo"
             target="_blank"
             rel="noopener noreferrer"
-            className="relative font-semibold text-sm leading-6 text-[#0A1524] hover:text-[#0A1524] transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-[#2f6fce] after:to-[#63bdcc] after:transition-all after:duration-300 hover:after:w-full"
+            className={linkStyles}
           >
             Source Code
           </a>
@@ -57,9 +58,17 @@ function Header() {
             href="https://www.youtube.com/watch?v=wIJViQgZFH0"
             target="_blank"
             rel="noopener noreferrer"
-            className="relative font-semibold text-sm leading-6 text-[#0A1524] hover:text-[#0A1524] transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-[#2f6fce] after:to-[#63bdcc] after:transition-all after:duration-300 hover:after:w-full"
+            className={linkStyles}
           >
             Video Walkthrough
+          </a>
+          <a
+            href="https://t.me/derek_chiang"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={linkStyles}
+          >
+            Contact
           </a>
           <ConnectButton />
         </div>
@@ -122,6 +131,14 @@ function Header() {
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                 >
                   Video Walkthrough
+                </a>
+                <a
+                  href="https://t.me/derek_chiang"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                >
+                  Contact
                 </a>
               </div>
               <div className="py-6">
