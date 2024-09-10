@@ -33,21 +33,33 @@ function Header() {
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-x-12">
           <a
             href="https://magicaccount.io/"
-            className="relative font-bold text-base leading-6 text-[#0A1524] hover:text-[#0A1524] transition-colors duration-300 after:absolute after:bottom-[-6px] after:left-0 after:w-0 after:h-1 after:bg-gradient-to-r after:from-[#2f6fce] after:to-[#63bdcc] after:transition-all after:duration-300 hover:after:w-full"
+            className="relative font-semibold text-sm leading-6 text-[#0A1524] hover:text-[#0A1524] transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-[#2f6fce] after:to-[#63bdcc] after:transition-all after:duration-300 hover:after:w-full"
           >
             Home
           </a>
           <a
             href="https://docs.zerodev.app/magic-account"
-            className="relative font-bold text-base leading-6 text-[#0A1524] hover:text-[#0A1524] transition-colors duration-300 after:absolute after:bottom-[-6px] after:left-0 after:w-0 after:h-1 after:bg-gradient-to-r after:from-[#2f6fce] after:to-[#63bdcc] after:transition-all after:duration-300 hover:after:w-full"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative font-semibold text-sm leading-6 text-[#0A1524] hover:text-[#0A1524] transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-[#2f6fce] after:to-[#63bdcc] after:transition-all after:duration-300 hover:after:w-full"
           >
             Docs
           </a>
           <a
             href="https://github.com/zerodevapp/magic-account-demo"
-            className="relative font-bold text-base leading-6 text-[#0A1524] hover:text-[#0A1524] transition-colors duration-300 after:absolute after:bottom-[-6px] after:left-0 after:w-0 after:h-1 after:bg-gradient-to-r after:from-[#2f6fce] after:to-[#63bdcc] after:transition-all after:duration-300 hover:after:w-full"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative font-semibold text-sm leading-6 text-[#0A1524] hover:text-[#0A1524] transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-[#2f6fce] after:to-[#63bdcc] after:transition-all after:duration-300 hover:after:w-full"
           >
             Source Code
+          </a>
+          <a
+            href="https://www.youtube.com/watch?v=wIJViQgZFH0"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative font-semibold text-sm leading-6 text-[#0A1524] hover:text-[#0A1524] transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-[#2f6fce] after:to-[#63bdcc] after:transition-all after:duration-300 hover:after:w-full"
+          >
+            Video Walkthrough
           </a>
           <ConnectButton />
         </div>
@@ -89,15 +101,27 @@ function Header() {
                 </a>
                 <a
                   href="https://docs.zerodev.app/magic-account"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                 >
                   Docs
                 </a>
                 <a
                   href="https://github.com/zerodevapp/magic-account-demo"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                 >
                   Source Code
+                </a>
+                <a
+                  href="https://www.youtube.com/watch?v=wIJViQgZFH0"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                >
+                  Video Walkthrough
                 </a>
               </div>
               <div className="py-6">
