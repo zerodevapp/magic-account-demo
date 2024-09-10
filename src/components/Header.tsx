@@ -1,11 +1,11 @@
-import { useState } from 'react'
-import { Dialog, DialogPanel } from '@headlessui/react'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
-import logo from '../assets/logo.png'
-import { ConnectButton } from './auth/ConnectButton'
+import { useState } from "react";
+import { Dialog, DialogPanel } from "@headlessui/react";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import logo from "../assets/logo.png";
+import { ConnectButton } from "./auth/ConnectButton";
 
 function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="bg-white shadow-md">
@@ -13,7 +13,11 @@ function Header() {
         <div className="flex lg:flex-1">
           <a href="https://magicaccount.io/" className="-m-1.5 p-1.5">
             <span className="sr-only">Magic Account</span>
-            <img src={logo} alt="Magic Account Logo" className="h-16 w-auto object-contain" />
+            <img
+              src={logo}
+              alt="Magic Account Logo"
+              className="h-16 w-auto object-contain"
+            />
           </a>
         </div>
         <div className="flex lg:hidden">
@@ -26,7 +30,7 @@ function Header() {
             <Bars3Icon className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
-        <div className="hidden lg:flex lg:gap-x-12">
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-x-12">
           <a
             href="https://magicaccount.io/"
             className="relative font-bold text-base leading-6 text-[#0A1524] hover:text-[#0A1524] transition-colors duration-300 after:absolute after:bottom-[-6px] after:left-0 after:w-0 after:h-1 after:bg-gradient-to-r after:from-[#2f6fce] after:to-[#63bdcc] after:transition-all after:duration-300 hover:after:w-full"
@@ -39,18 +43,31 @@ function Header() {
           >
             Docs
           </a>
-        </div>
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+          <a
+            href="https://github.com/zerodevapp/magic-account-demo"
+            className="relative font-bold text-base leading-6 text-[#0A1524] hover:text-[#0A1524] transition-colors duration-300 after:absolute after:bottom-[-6px] after:left-0 after:w-0 after:h-1 after:bg-gradient-to-r after:from-[#2f6fce] after:to-[#63bdcc] after:transition-all after:duration-300 hover:after:w-full"
+          >
+            Source Code
+          </a>
           <ConnectButton />
         </div>
       </nav>
-      <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
+      <Dialog
+        as="div"
+        className="lg:hidden"
+        open={mobileMenuOpen}
+        onClose={setMobileMenuOpen}
+      >
         <div className="fixed inset-0 z-10" />
         <DialogPanel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
           <div className="flex items-center justify-between">
             <a href="https://magicaccount.io/" className="-m-1.5 p-1.5">
               <span className="sr-only">Magic Account</span>
-              <img src={logo} alt="Magic Account Logo" className="h-16 w-auto object-contain" />
+              <img
+                src={logo}
+                alt="Magic Account Logo"
+                className="h-16 w-auto object-contain"
+              />
             </a>
             <button
               type="button"
@@ -76,6 +93,12 @@ function Header() {
                 >
                   Docs
                 </a>
+                <a
+                  href="https://github.com/zerodevapp/magic-account-demo"
+                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                >
+                  Source Code
+                </a>
               </div>
               <div className="py-6">
                 <ConnectButton />
@@ -85,7 +108,7 @@ function Header() {
         </DialogPanel>
       </Dialog>
     </header>
-  )
+  );
 }
 
-export default Header
+export default Header;
