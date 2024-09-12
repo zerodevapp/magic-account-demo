@@ -33,6 +33,48 @@ function SendModal({ open, onClose }: SendModalProps) {
 
   const [insufficientBalance, setInsufficientBalance] = useState(false);
   const [feeEstimate, setFeeEstimate] = useState<string | null>(null);
+  const [debugAmount, setDebugAmount] = useState("");
+
+  const debouncedEstimateFees = useCallback(
+    debounce(async (amount: string) => {
+      if (!amount || !selectedChainId) return;
+
+      const tokenAddress = tokenAddresses[
+        selectedChainId as keyof typeof tokenAddresses
+      ]?.USDC as `0x${string}`;
+      if (!tokenAddress) {
+        console.error("USDC address not found for the selected chain");
+        return;
+      }
+
+      try {
+        const transferCall = {
+          to: tokenAddress,
+          data: encodeFunctionData({
+            abi: erc20Abi,
+            functionName: "transfer",
+            args: [address!, parseUnits(amount, tokenDecimals.USDC)],
+          }),
+          value: 0n,
+        };
+
+        const result = await estimateFees({
+          calls: [transferCall],
+          repayTokens: [],
+          chainId: selectedChainId,
+        });
+
+        console.log("Estimate fees result:", result);
+      } catch (error) {
+        console.error("Error estimating fees:", error);
+      }
+    }, 500),
+    [selectedChainId, address, estimateFees]
+  );
+
+  useEffect(() => {
+    debouncedEstimateFees(debugAmount);
+  }, [debugAmount, debouncedEstimateFees]);
 
   useEffect(() => {
     const calculateMaxAmount = async () => {
@@ -248,7 +290,7 @@ function SendModal({ open, onClose }: SendModalProps) {
           {insufficientBalance && (
             <p className="mt-1 text-sm text-red-600">Insufficient balance.</p>
           )}
-          {(feeEstimate && !isLoadingEstimateFees) && (
+          {feeEstimate && !isLoadingEstimateFees && (
             <p className="mt-1 text-sm text-gray-600">
               Estimated fee: ${feeEstimate} USDC
             </p>
@@ -274,6 +316,27 @@ function SendModal({ open, onClose }: SendModalProps) {
       >
         {isLoading ? "Sending..." : "Send"}
       </Button>
+      <div className="mt-4">
+        <label
+          htmlFor="debugAmount"
+          className="block text-sm font-medium text-gray-700 mb-1"
+        >
+          Debug Estimate Fees
+        </label>
+        <input
+          type="number"
+          id="debugAmount"
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+          placeholder="Enter amount to estimate fees"
+          value={debugAmount}
+          onChange={(e) => setDebugAmount(e.target.value)}
+          min="0"
+          step="any"
+        />
+        <p className="mt-1 text-sm text-gray-600">
+          Check console for estimate fees output
+        </p>
+      </div>
     </Modal>
   );
 }
