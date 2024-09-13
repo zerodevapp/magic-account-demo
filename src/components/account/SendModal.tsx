@@ -33,52 +33,10 @@ function SendModal({ open, onClose }: SendModalProps) {
 
   const [insufficientBalance, setInsufficientBalance] = useState(false);
   const [feeEstimate, setFeeEstimate] = useState<string | null>(null);
-  const [debugAmount, setDebugAmount] = useState("");
-
-  const debouncedEstimateFees = useCallback(
-    debounce(async (amount: string) => {
-      if (!amount || !selectedChainId) return;
-
-      const tokenAddress = tokenAddresses[
-        selectedChainId as keyof typeof tokenAddresses
-      ]?.USDC as `0x${string}`;
-      if (!tokenAddress) {
-        console.error("USDC address not found for the selected chain");
-        return;
-      }
-
-      try {
-        const transferCall = {
-          to: tokenAddress,
-          data: encodeFunctionData({
-            abi: erc20Abi,
-            functionName: "transfer",
-            args: [address!, parseUnits(amount, tokenDecimals.USDC)],
-          }),
-          value: 0n,
-        };
-
-        const result = await estimateFees({
-          calls: [transferCall],
-          repayTokens: [],
-          chainId: selectedChainId,
-        });
-
-        console.log("Estimate fees result:", result);
-      } catch (error) {
-        console.error("Error estimating fees:", error);
-      }
-    }, 500),
-    [selectedChainId, address, estimateFees]
-  );
-
-  useEffect(() => {
-    debouncedEstimateFees(debugAmount);
-  }, [debugAmount, debouncedEstimateFees]);
 
   useEffect(() => {
     const calculateMaxAmount = async () => {
-      if (cabBalance && selectedChainId) {
+      if (cabBalance && selectedChainId && address) {
         try {
           const zeroTransferCall = {
             to: tokenAddresses[selectedChainId as keyof typeof tokenAddresses]
@@ -86,7 +44,7 @@ function SendModal({ open, onClose }: SendModalProps) {
             data: encodeFunctionData({
               abi: erc20Abi,
               functionName: "transfer",
-              args: [address!, parseUnits("3", tokenDecimals.USDC)],
+              args: [address, parseUnits("0.000001", tokenDecimals.USDC)],
             }),
             value: 0n,
           };
@@ -113,8 +71,10 @@ function SendModal({ open, onClose }: SendModalProps) {
       }
     };
 
-    calculateMaxAmount();
-  }, [cabBalance, selectedChainId, estimateFees]);
+    if (open) {
+      calculateMaxAmount();
+    }
+  }, [open, cabBalance, selectedChainId, estimateFees, address]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -167,6 +127,8 @@ function SendModal({ open, onClose }: SendModalProps) {
           autoClose: 15000,
         }
       );
+      setAmount("");
+      setRecipient("");
       onClose();
     },
   });
@@ -316,27 +278,6 @@ function SendModal({ open, onClose }: SendModalProps) {
       >
         {isLoading ? "Sending..." : "Send"}
       </Button>
-      <div className="mt-4">
-        <label
-          htmlFor="debugAmount"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Debug Estimate Fees
-        </label>
-        <input
-          type="number"
-          id="debugAmount"
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Enter amount to estimate fees"
-          value={debugAmount}
-          onChange={(e) => setDebugAmount(e.target.value)}
-          min="0"
-          step="any"
-        />
-        <p className="mt-1 text-sm text-gray-600">
-          Check console for estimate fees output
-        </p>
-      </div>
     </Modal>
   );
 }
