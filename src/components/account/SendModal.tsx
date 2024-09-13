@@ -33,6 +33,7 @@ function SendModal({ open, onClose }: SendModalProps) {
   const [feeEstimate, setFeeEstimate] = useState<string | null>(null);
   const [isLoadingEstimateFees, setIsLoadingEstimateFees] = useState(false);
   const [baseFeeEstimate, setBaseFeeEstimate] = useState<number | null>(null);
+  const [inputValue, setInputValue] = useState("");
 
   // Validate recipient address with debounce
   const validateAddress = useCallback(
@@ -208,15 +209,24 @@ function SendModal({ open, onClose }: SendModalProps) {
     estimateTransactionFees();
   }, [estimateTransactionFees]);
 
+  const debouncedSetAmount = useCallback(
+    debounce((value: string) => {
+      setAmount(value);
+    }, 600),
+    []
+  );
+
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === "" || parseFloat(value) >= 0) {
-      setAmount(value);
+      setInputValue(value);
+      debouncedSetAmount(value);
     }
   };
 
   const handleSetMaxAmount = () => {
     if (maxAmount) {
+      setInputValue(maxAmount);
       setAmount(maxAmount);
       setInsufficientBalance(false);
       // Since we're using baseFeeEstimate, set feeEstimate accordingly
@@ -362,11 +372,10 @@ function SendModal({ open, onClose }: SendModalProps) {
               id="amount"
               className="w-full p-3 pr-16 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
               placeholder="0"
-              value={amount}
               onChange={handleAmountChange}
+              value={inputValue}
               min="0"
               step="any"
-              disabled={isLoadingEstimateFees}
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3">
               <button
