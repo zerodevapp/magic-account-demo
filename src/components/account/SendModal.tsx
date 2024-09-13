@@ -1,10 +1,10 @@
 import { useState, useCallback, useEffect } from "react";
 import Modal from "../Modal";
-import { tokens } from "../../utils/utils";
-import { useReadCab } from "@zerodev/magic-account";
+import { useReadCab, useEstimateFeesCab } from "@zerodev/magic-account";
 import { formatUnits, isAddress } from "viem";
 import ChainSelect from "../ChainSelect";
 import { arbitrum } from "viem/chains";
+import { erc20Abi, encodeFunctionData, parseUnits } from "viem";
 import { useSendErc20Token } from "../../hooks/useSendErc20Token";
 import debounce from "lodash/debounce";
 import {
@@ -27,16 +27,69 @@ function SendModal({ open, onClose }: SendModalProps) {
   const [selectedChainId, setSelectedChainId] = useState(Number(arbitrum.id));
   const { address } = useAccount();
   const [isValidAddress, setIsValidAddress] = useState<boolean | null>(null);
+  const { estimateFees, isLoading: isLoadingEstimateFees } =
+    useEstimateFeesCab();
+  const [maxAmount, setMaxAmount] = useState<string | null>(null);
 
   const [insufficientBalance, setInsufficientBalance] = useState(false);
+  const [feeEstimate, setFeeEstimate] = useState<string | null>(null);
+
+  useEffect(() => {
+    const calculateMaxAmount = async () => {
+      if (cabBalance && selectedChainId && address) {
+        try {
+          const zeroTransferCall = {
+            to: tokenAddresses[selectedChainId as keyof typeof tokenAddresses]
+              ?.USDC as `0x${string}`,
+            data: encodeFunctionData({
+              abi: erc20Abi,
+              functionName: "transfer",
+              args: [address, parseUnits("0.000001", tokenDecimals.USDC)],
+            }),
+            value: 0n,
+          };
+
+          const result = await estimateFees({
+            calls: [zeroTransferCall],
+            repayTokens: [],
+            chainId: selectedChainId,
+          });
+          if (result.error) {
+            setFeeEstimate(null);
+            return;
+          }
+          const baseFee = Number(result.estimatedFee);
+          const maxAmount = Number(formatUnits(cabBalance, 6)) - baseFee * 1.1;
+
+          setMaxAmount(maxAmount.toString());
+          setFeeEstimate((baseFee * 1.1).toFixed(6));
+        } catch (error) {
+          console.error("Error calculating max amount:", error);
+          setMaxAmount(null);
+          setFeeEstimate(null);
+        }
+      }
+    };
+
+    if (open) {
+      calculateMaxAmount();
+    }
+  }, [open, cabBalance, selectedChainId, estimateFees, address]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === "" || parseFloat(value) >= 0) {
       setAmount(value);
       setInsufficientBalance(
-        parseFloat(value) > parseFloat(formatUnits(cabBalance || 0n, 6))
+        maxAmount !== null && parseFloat(value) > parseFloat(maxAmount)
       );
+    }
+  };
+
+  const handleSetMaxAmount = () => {
+    if (maxAmount) {
+      setAmount(maxAmount);
+      setInsufficientBalance(false);
     }
   };
 
@@ -74,6 +127,8 @@ function SendModal({ open, onClose }: SendModalProps) {
           autoClose: 15000,
         }
       );
+      setAmount("");
+      setRecipient("");
       onClose();
     },
   });
@@ -181,18 +236,29 @@ function SendModal({ open, onClose }: SendModalProps) {
               onChange={handleAmountChange}
               min="0"
               step="any"
+              disabled={isLoadingEstimateFees}
             />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <img
-                src={tokens.find((t) => t.symbol === "USDC")?.logo}
-                alt="USDC"
-                className="w-5 h-5 mr-1 bg-white"
-              />
-              <span className="font-medium">USDC</span>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+              <button
+                type="button"
+                onClick={handleSetMaxAmount}
+                className="text-sm text-blue-600 font-medium hover:text-blue-800"
+                disabled={isLoadingEstimateFees}
+              >
+                Max
+              </button>
             </div>
           </div>
           {insufficientBalance && (
             <p className="mt-1 text-sm text-red-600">Insufficient balance.</p>
+          )}
+          {feeEstimate && !isLoadingEstimateFees && (
+            <p className="mt-1 text-sm text-gray-600">
+              Estimated fee: ${feeEstimate} USDC
+            </p>
+          )}
+          {isLoadingEstimateFees && (
+            <p className="mt-1 text-sm text-gray-600">Estimating fee...</p>
           )}
         </div>
       </div>
