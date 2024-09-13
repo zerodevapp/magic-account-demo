@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Modal from "../Modal";
 import { useReadCab, useEstimateFeesCab } from "@zerodev/magic-account";
 import { formatUnits, isAddress } from "viem";
@@ -11,7 +11,7 @@ import {
   tokenAddresses,
   tokenDecimals,
 } from "../../services/uniswap/constants";
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 import { toast } from "react-toastify";
 import { useAccount } from "wagmi";
 
@@ -24,75 +24,17 @@ function SendModal({ open, onClose }: SendModalProps) {
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const { data: cabBalance } = useReadCab({ refetchInterval: 1000 });
-  const [selectedChainId, setSelectedChainId] = useState(Number(arbitrum.id));
+  const [selectedChainId, setSelectedChainId] = useState<number>(arbitrum.id);
   const { address } = useAccount();
   const [isValidAddress, setIsValidAddress] = useState<boolean | null>(null);
-  const { estimateFees, isLoading: isLoadingEstimateFees } =
-    useEstimateFeesCab();
+  const { estimateFees } = useEstimateFeesCab();
   const [maxAmount, setMaxAmount] = useState<string | null>(null);
-
   const [insufficientBalance, setInsufficientBalance] = useState(false);
   const [feeEstimate, setFeeEstimate] = useState<string | null>(null);
+  const [isLoadingEstimateFees, setIsLoadingEstimateFees] = useState(false);
+  const [baseFeeEstimate, setBaseFeeEstimate] = useState<number | null>(null);
 
-  useEffect(() => {
-    const calculateMaxAmount = async () => {
-      if (cabBalance && selectedChainId && address) {
-        try {
-          const zeroTransferCall = {
-            to: tokenAddresses[selectedChainId as keyof typeof tokenAddresses]
-              ?.USDC as `0x${string}`,
-            data: encodeFunctionData({
-              abi: erc20Abi,
-              functionName: "transfer",
-              args: [address, parseUnits("0.000001", tokenDecimals.USDC)],
-            }),
-            value: 0n,
-          };
-
-          const result = await estimateFees({
-            calls: [zeroTransferCall],
-            repayTokens: [],
-            chainId: selectedChainId,
-          });
-          if (result.error) {
-            setFeeEstimate(null);
-            return;
-          }
-          const baseFee = Number(result.estimatedFee);
-          const maxAmount = Number(formatUnits(cabBalance, 6)) - baseFee * 1.1;
-
-          setMaxAmount(maxAmount.toString());
-          setFeeEstimate((baseFee * 1.1).toFixed(6));
-        } catch (error) {
-          console.error("Error calculating max amount:", error);
-          setMaxAmount(null);
-          setFeeEstimate(null);
-        }
-      }
-    };
-
-    if (open) {
-      calculateMaxAmount();
-    }
-  }, [open, cabBalance, selectedChainId, estimateFees, address]);
-
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === "" || parseFloat(value) >= 0) {
-      setAmount(value);
-      setInsufficientBalance(
-        maxAmount !== null && parseFloat(value) > parseFloat(maxAmount)
-      );
-    }
-  };
-
-  const handleSetMaxAmount = () => {
-    if (maxAmount) {
-      setAmount(maxAmount);
-      setInsufficientBalance(false);
-    }
-  };
-
+  // Validate recipient address with debounce
   const validateAddress = useCallback(
     debounce((address: string) => {
       setIsValidAddress(address ? isAddress(address) : null);
@@ -103,6 +45,186 @@ function SendModal({ open, onClose }: SendModalProps) {
   useEffect(() => {
     validateAddress(recipient);
   }, [recipient, validateAddress]);
+
+  // Estimate base fee when modal opens or chain changes
+  const estimateBaseFee = useCallback(async () => {
+    if (!selectedChainId) return;
+
+    try {
+      const tokenAddress = tokenAddresses[
+        selectedChainId as keyof typeof tokenAddresses
+      ]?.USDC as `0x${string}`;
+
+      if (!tokenAddress) {
+        console.error("USDC address not found for the selected chain");
+        setBaseFeeEstimate(null);
+        return;
+      }
+
+      const minimalTransferAmount = "0.000001"; // Minimal amount for base fee estimation
+      const transferCall = {
+        to: tokenAddress,
+        data: encodeFunctionData({
+          abi: erc20Abi,
+          functionName: "transfer",
+          args: [
+            address as `0x${string}`,
+            parseUnits(minimalTransferAmount, tokenDecimals.USDC),
+          ],
+        }),
+        value: 0n,
+      };
+
+      setIsLoadingEstimateFees(true);
+      const result = await estimateFees({
+        calls: [transferCall],
+        repayTokens: [],
+        chainId: selectedChainId,
+      });
+      setIsLoadingEstimateFees(false);
+
+      if (result.error) {
+        setBaseFeeEstimate(null);
+        console.error("Error estimating base fees:", result.error);
+        return;
+      }
+
+      const baseFee = Number(result.estimatedFee);
+      const feeBuffer = 1.03;
+      const estimatedBaseFee = baseFee * feeBuffer;
+      setBaseFeeEstimate(estimatedBaseFee);
+
+      // Calculate maxAmount
+      if (cabBalance) {
+        const balance = Number(formatUnits(cabBalance, tokenDecimals.USDC));
+        const maxAmountValue = balance - estimatedBaseFee;
+        setMaxAmount(maxAmountValue > 0 ? maxAmountValue.toFixed(6) : "0");
+      }
+    } catch (error) {
+      console.error("Error estimating base fee:", error);
+      setBaseFeeEstimate(null);
+      setIsLoadingEstimateFees(false);
+    }
+  }, [selectedChainId, estimateFees, cabBalance, address]);
+
+  // Estimate transaction fees based on user inputs
+  const estimateTransactionFees = useCallback(async () => {
+    if (
+      !recipient ||
+      !amount ||
+      !selectedChainId ||
+      !isAddress(recipient) ||
+      parseFloat(amount) <= 0
+    ) {
+      setFeeEstimate(null);
+      setInsufficientBalance(false);
+      return;
+    }
+
+    // Check if amount equals maxAmount and use baseFeeEstimate
+    if (amount === maxAmount && baseFeeEstimate !== null) {
+      const estimatedFee = baseFeeEstimate;
+      setFeeEstimate(estimatedFee.toFixed(6));
+
+      // Update insufficientBalance
+      if (cabBalance) {
+        const balance = Number(formatUnits(cabBalance, tokenDecimals.USDC));
+        const totalAmount = parseFloat(amount) + estimatedFee;
+        setInsufficientBalance(totalAmount > balance);
+      }
+      return;
+    }
+
+    try {
+      const tokenAddress = tokenAddresses[
+        selectedChainId as keyof typeof tokenAddresses
+      ]?.USDC as `0x${string}`;
+
+      if (!tokenAddress) {
+        console.error("USDC address not found for the selected chain");
+        setFeeEstimate(null);
+        return;
+      }
+
+      const transferCall = {
+        to: tokenAddress,
+        data: encodeFunctionData({
+          abi: erc20Abi,
+          functionName: "transfer",
+          args: [recipient as `0x${string}`, parseUnits(amount, tokenDecimals.USDC)],
+        }),
+        value: 0n,
+      };
+
+      setIsLoadingEstimateFees(true);
+      const result = await estimateFees({
+        calls: [transferCall],
+        repayTokens: [],
+        chainId: selectedChainId,
+      });
+      setIsLoadingEstimateFees(false);
+
+      if (result.error) {
+        setFeeEstimate(null);
+        console.error("Error estimating fees:", result.error);
+        return;
+      }
+
+      const baseFee = Number(result.estimatedFee);
+      const feeBuffer = 1.03;
+      const estimatedFee = parseFloat((baseFee * feeBuffer).toFixed(6));
+      setFeeEstimate(estimatedFee.toFixed(6));
+
+      // Update insufficientBalance
+      if (cabBalance) {
+        const balance = Number(formatUnits(cabBalance, tokenDecimals.USDC));
+        const totalAmount = parseFloat(amount) + estimatedFee;
+        setInsufficientBalance(totalAmount > balance);
+      }
+    } catch (error) {
+      console.error("Error estimating transaction fees:", error);
+      setFeeEstimate(null);
+      setIsLoadingEstimateFees(false);
+    }
+  }, [
+    recipient,
+    amount,
+    selectedChainId,
+    estimateFees,
+    cabBalance,
+    maxAmount,
+    baseFeeEstimate,
+  ]);
+
+  // Re-estimate base fee when modal opens or chain changes
+  useEffect(() => {
+    if (open) {
+      estimateBaseFee();
+    }
+  }, [open, estimateBaseFee]);
+
+  // Re-estimate transaction fees when relevant inputs change
+  useEffect(() => {
+    estimateTransactionFees();
+  }, [estimateTransactionFees]);
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "" || parseFloat(value) >= 0) {
+      setAmount(value);
+    }
+  };
+
+  const handleSetMaxAmount = () => {
+    if (maxAmount) {
+      setAmount(maxAmount);
+      setInsufficientBalance(false);
+      // Since we're using baseFeeEstimate, set feeEstimate accordingly
+      if (baseFeeEstimate !== null) {
+        setFeeEstimate(baseFeeEstimate.toFixed(6));
+      }
+    }
+  };
 
   const { sendToken, isLoading } = useSendErc20Token({
     onSuccess: (userOpHash) => {
@@ -152,6 +274,7 @@ function SendModal({ open, onClose }: SendModalProps) {
       decimals: tokenDecimals.USDC,
     });
   };
+
   return (
     <Modal open={open} handleClose={onClose} showPoweredBy={false}>
       <h2 className="text-2xl font-semibold mb-6">Send</h2>
@@ -182,7 +305,10 @@ function SendModal({ open, onClose }: SendModalProps) {
               </span>
             </div>
             <span className="text-sm text-gray-500">
-              ${cabBalance ? formatUnits(cabBalance, 6) : "0.00"}
+              $
+              {cabBalance
+                ? Number(formatUnits(cabBalance, tokenDecimals.USDC)).toFixed(6)
+                : "0.00"}
             </span>
           </div>
         </div>
@@ -193,10 +319,14 @@ function SendModal({ open, onClose }: SendModalProps) {
           </label>
           <ChainSelect
             selectedChainId={selectedChainId}
-            onChainSelect={setSelectedChainId}
+            onChainSelect={(chainId) => {
+              setSelectedChainId(chainId);
+              setRecipient("");
+            }}
           />
         </div>
 
+        {/* Recipient Address */}
         <div>
           <label
             htmlFor="recipient"
@@ -243,7 +373,7 @@ function SendModal({ open, onClose }: SendModalProps) {
                 type="button"
                 onClick={handleSetMaxAmount}
                 className="text-sm text-blue-600 font-medium hover:text-blue-800"
-                disabled={isLoadingEstimateFees}
+                disabled={isLoadingEstimateFees || !maxAmount}
               >
                 Max
               </button>
@@ -270,13 +400,24 @@ function SendModal({ open, onClose }: SendModalProps) {
         onClick={handleSend}
         disabled={
           isLoading ||
+          isLoadingEstimateFees ||
           isValidAddress === false ||
           !recipient ||
           !amount ||
-          insufficientBalance
+          insufficientBalance ||
+          !feeEstimate
         }
       >
-        {isLoading ? "Sending..." : "Send"}
+        {isLoading ? (
+          <>
+            Sending...
+            <CircularProgress size={20} color="inherit" sx={{ ml: 2 }} />
+          </>
+        ) : isLoadingEstimateFees ? (
+          "Estimating Fees..."
+        ) : (
+          "Send"
+        )}
       </Button>
     </Modal>
   );

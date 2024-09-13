@@ -3,13 +3,34 @@ import { useState } from "react";
 import { Tooltip } from "@mui/material";
 import { useEnableCab } from "@zerodev/magic-account";
 import useAutoEnableCab from "../../hooks/useAutoEnableCab";
-import arbitrumIcon from "../../assets/networks/arbitrum.svg";
-import optimismIcon from "../../assets/networks/optimism.svg";
-import polygonIcon from "../../assets/networks/polygon.svg";
-import baseIcon from "../../assets/networks/base.svg";
 import TokenBalances from "../TokenBalances";
 import ChainAbstractedBalance from "./ChainAbstractedBalance";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import QrCodeIcon from "@mui/icons-material/QrCode"; // Updated import
+import QRCode from "react-qr-code";
+import { getChainIcon, chains } from "../../utils/utils";
+
+interface QRCodeTooltipProps {
+  address: string;
+}
+
+const QRCodeTooltip: React.FC<QRCodeTooltipProps> = ({ address }) => {
+  return (
+    <Tooltip
+      title={
+        <div style={{ backgroundColor: "white", padding: "10px" }}>
+          <QRCode value={address} size={128} />
+        </div>
+      }
+      placement="top"
+      arrow
+    >
+      <button className="ml-2">
+        <QrCodeIcon fontSize="small" />
+      </button>
+    </Tooltip>
+  );
+};
 
 function Account() {
   const { address, isConnected } = useAccount();
@@ -25,8 +46,11 @@ function Account() {
   };
 
   const shortenAddress = (addr: string) => {
+    if (!addr) return "";
     return `${addr.slice(0, 8)}...${addr.slice(-6)}`;
   };
+
+  const displayAddress = address || "";
 
   if (!isConnected) {
     return (
@@ -49,18 +73,26 @@ function Account() {
       <div className="border-t border-gray-100">
         <dl className="divide-y divide-gray-100">
           <div className="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 sm:items-center bg-slate-100">
-            <dt className="text-sm font-medium text-gray-900 flex flex-col  sm:col-span-2">
+            <dt className="text-sm font-medium text-gray-900 flex flex-col sm:col-span-2">
               <span>Address</span>
               <span className="text-sm font-normal text-gray-500">
-                {shortenAddress(address || "")}
+                {shortenAddress(displayAddress)}
               </span>
             </dt>
             <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-1 sm:mt-0 sm:text-right">
-              <Tooltip open={tooltipOpen} title="Copied!" placement="top" arrow>
-                <button onClick={copyAddress} className="ml-2">
-                  <ContentCopyIcon fontSize="small" />
-                </button>
-              </Tooltip>
+              <div className="flex justify-end">
+                <Tooltip
+                  open={tooltipOpen}
+                  title="Copied!"
+                  placement="top"
+                  arrow
+                >
+                  <button onClick={copyAddress} className="ml-2">
+                    <ContentCopyIcon fontSize="small" />
+                  </button>
+                </Tooltip>
+                <QRCodeTooltip address={displayAddress} />
+              </div>
             </dd>
           </div>
           <div className="px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 sm:items-center">
@@ -89,26 +121,14 @@ function Account() {
             </dt>
             <dd className="mt-1 text-sm leading-6 text-gray-700 sm:col-span-1 sm:mt-0 sm:text-right">
               <div className="flex -space-x-2 overflow-hidden justify-start sm:justify-end">
-                <img
-                  src={arbitrumIcon}
-                  alt="Arbitrum"
-                  className="inline-block w-8 h-8 rounded-full ring-2 ring-white"
-                />
-                <img
-                  src={optimismIcon}
-                  alt="Optimism"
-                  className="inline-block w-8 h-8 rounded-full ring-2 ring-white"
-                />
-                <img
-                  src={polygonIcon}
-                  alt="Polygon"
-                  className="inline-block w-8 h-8 rounded-full ring-2 ring-white bg-white"
-                />
-                <img
-                  src={baseIcon}
-                  alt="Base"
-                  className="inline-block w-8 h-8 rounded-full ring-2 ring-white"
-                />
+                {chains.map((chain) => (
+                  <img
+                    key={chain.id}
+                    src={getChainIcon(chain.id)}
+                    alt={chain.name}
+                    className="inline-block w-8 h-8 rounded-full ring-2 ring-white"
+                  />
+                ))}
               </div>
             </dd>
           </div>
