@@ -59,10 +59,12 @@ function SendModal({ open, onClose }: SendModalProps) {
             return;
           }
           const baseFee = Number(result.estimatedFee);
-          const maxAmount = Number(formatUnits(cabBalance, 6)) - baseFee * 1.1;
+          const feeBuffer = 1.03;
+          const maxAmount =
+            Number(formatUnits(cabBalance, 6)) - baseFee * feeBuffer;
 
           setMaxAmount(maxAmount.toString());
-          setFeeEstimate((baseFee * 1.1).toFixed(6));
+          setFeeEstimate((baseFee * feeBuffer).toFixed(6));
         } catch (error) {
           console.error("Error calculating max amount:", error);
           setMaxAmount(null);
