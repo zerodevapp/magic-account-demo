@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useTokenBalancesForChains } from "../hooks/useTokenBalancesForChains";
-import { chains } from "../services/uniswap/constants";
+import { chains } from "../utils/constants";
 import { useAccount } from "wagmi";
 import { tokens } from "../utils/utils";
 
@@ -16,16 +16,13 @@ function TokenBalances() {
 
   const tokenTotals = useMemo(() => {
     if (!balances) return {};
-    return tokens.reduce(
-      (acc, { symbol }) => {
-        acc[symbol] = Object.values(balances).reduce(
-          (sum, chainBalances) => sum + (chainBalances[symbol] || 0),
-          0
-        );
-        return acc;
-      },
-      {} as Record<string, number>
-    );
+    return tokens.reduce((acc, { symbol }) => {
+      acc[symbol] = Object.values(balances).reduce(
+        (sum, chainBalances) => sum + (chainBalances[symbol] || 0),
+        0
+      );
+      return acc;
+    }, {} as Record<string, number>);
   }, [balances]);
 
   return (
@@ -39,14 +36,16 @@ function TokenBalances() {
           value={selectedToken}
           onChange={(e) => setSelectedToken(e.target.value)}
         >
-          {tokens.filter(token => token.symbol !== 'USDC').map(({ symbol }) => (
-            <option key={symbol} value={symbol}>
-              {symbol}{" "}
-              {isLoading
-                ? "(Loading...)"
-                : `(${tokenTotals[symbol]?.toFixed(6) || "0.000000"})`}
-            </option>
-          ))}
+          {tokens
+            .filter((token) => token.symbol !== "USDC")
+            .map(({ symbol }) => (
+              <option key={symbol} value={symbol}>
+                {symbol}{" "}
+                {isLoading
+                  ? "(Loading...)"
+                  : `(${tokenTotals[symbol]?.toFixed(6) || "0.000000"})`}
+              </option>
+            ))}
         </select>
       </div>
 

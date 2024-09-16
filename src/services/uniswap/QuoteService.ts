@@ -2,7 +2,7 @@ import { Token } from '@uniswap/sdk-core';
 import Quoter from '@uniswap/v3-periphery/artifacts/contracts/lens/QuoterV2.sol/QuoterV2.json';
 import { fromReadableAmount, toReadableAmount } from '../../utils/conversion';
 import { Address } from 'viem';
-import { getPublicClient, chains } from './constants';
+import { getPublicClient, chains } from '../../utils/constants';
 import { getPoolInfo, getOutputQuote } from './TradeService';
 import { Pool, Route, FeeAmount } from '@uniswap/v3-sdk';
 
@@ -33,7 +33,7 @@ export async function getQuote(
 
         const amount = toReadableAmount(amountOut, tokenOut.decimals);
         return amount;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
         return getQuoteWithRoute(amountIn, tokenIn, tokenOut, chainId);
     }

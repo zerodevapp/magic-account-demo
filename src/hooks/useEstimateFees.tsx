@@ -1,10 +1,15 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from "react";
 import { useEstimateFeesCab } from "@zerodev/magic-account";
 import { encodeFunctionData, parseUnits } from "viem";
 import { erc20Abi } from "viem";
-import { tokenAddresses, tokenDecimals } from "../services/uniswap/constants";
+import { tokenAddresses, tokenDecimals } from "../utils/constants";
 
-export function useEstimateFees(selectedChainId: number, recipient: string, amount: string, address: string) {
+export function useEstimateFees(
+  selectedChainId: number,
+  recipient: string,
+  amount: string,
+  address: string
+) {
   const [baseFeeEstimate, setBaseFeeEstimate] = useState<number | null>(null);
   const [feeEstimate, setFeeEstimate] = useState<string | null>(null);
   const [isLoadingEstimateFees, setIsLoadingEstimateFees] = useState(false);
@@ -16,7 +21,9 @@ export function useEstimateFees(selectedChainId: number, recipient: string, amou
     setFeeError(false);
 
     try {
-      const tokenAddress = tokenAddresses[selectedChainId as keyof typeof tokenAddresses]?.USDC as `0x${string}`;
+      const tokenAddress = tokenAddresses[
+        selectedChainId as keyof typeof tokenAddresses
+      ]?.USDC as `0x${string}`;
 
       if (!tokenAddress) {
         console.error("USDC address not found for the selected chain");
@@ -79,7 +86,9 @@ export function useEstimateFees(selectedChainId: number, recipient: string, amou
     }
 
     try {
-      const tokenAddress = tokenAddresses[selectedChainId as keyof typeof tokenAddresses]?.USDC as `0x${string}`;
+      const tokenAddress = tokenAddresses[
+        selectedChainId as keyof typeof tokenAddresses
+      ]?.USDC as `0x${string}`;
 
       if (!tokenAddress) {
         console.error("USDC address not found for the selected chain");

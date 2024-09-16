@@ -5,7 +5,7 @@ import { computePoolAddress } from '@uniswap/v3-sdk';
 import { fromReadableAmount } from '../../utils/conversion';
 import { getContract, decodeAbiParameters, parseAbiParameters, erc20Abi, encodeFunctionData } from 'viem';
 import { FeeAmount } from '@uniswap/v3-sdk'
-import { getPublicClient, chains } from './constants';
+import { getPublicClient, chains } from '../../utils/constants';
 
 export async function getTradeTransactions(
     tokenIn: Token,
@@ -29,7 +29,7 @@ export async function getTradeTransactions(
 
     const amountIn = fromReadableAmount(amount, tokenIn.decimals).toString()
     const quote = await getOutputQuote(swapRoute, amount, tokenIn, chainId);
-    const amountt =  CurrencyAmount.fromRawAmount(
+    const amountt = CurrencyAmount.fromRawAmount(
         tokenOut,
         quote.toString()
     )

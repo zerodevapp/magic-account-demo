@@ -1,6 +1,6 @@
 import { formatUnits, Address } from 'viem';
-import { getPublicClient } from '../uniswap/constants';
-import { tokenAddresses, tokenDecimals, chains } from './constants';
+import { getPublicClient } from '../../utils/constants';
+import { tokenAddresses, tokenDecimals, chains } from '../../utils/constants';
 import { erc20Abi } from 'viem';
 
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { Transition } from "@headlessui/react";
-import { chains } from "../services/uniswap/constants";
+import { chains } from "../utils/constants";
 import { getChainIcon } from "../utils/utils";
 
 interface ChainSelectProps {

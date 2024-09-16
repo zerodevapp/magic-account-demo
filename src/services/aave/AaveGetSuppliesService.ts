@@ -1,6 +1,6 @@
 import { Address, encodeFunctionData, parseAbi, PublicClient } from 'viem';
 import { Chain, optimism, arbitrum, polygon, base } from 'viem/chains';
-import { getPublicClient } from '../uniswap/constants';
+import { getPublicClient } from '../../utils/constants';
 import { mcUSDC } from './utils';
 
 interface SuppliedPosition {

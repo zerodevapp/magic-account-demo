@@ -5,10 +5,7 @@ import { Token } from "@uniswap/sdk-core";
 import { arbitrum } from "viem/chains";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
-import {
-  tokenAddresses,
-  tokenDecimals,
-} from "../../services/uniswap/constants";
+import { tokenAddresses, tokenDecimals } from "../../utils/constants";
 import { useReadCab } from "@zerodev/magic-account";
 import TokenSelectModal from "./TokenSelectModal";
 import { tokens as tokenData } from "../../utils/utils";

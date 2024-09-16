@@ -4,7 +4,7 @@ import { useReadCab } from "@zerodev/magic-account";
 import { formatUnits } from "viem";
 import ChainSelect from "../ChainSelect";
 import { arbitrum } from "viem/chains";
-import { tokenAddresses, tokenDecimals } from "../../services/uniswap/constants";
+import { tokenAddresses, tokenDecimals } from "../../utils/constants";
 import { Button, CircularProgress } from "@mui/material";
 import { toast } from "react-toastify";
 import { useAccount } from "wagmi";
@@ -31,7 +31,8 @@ function SendModal({ open, onClose }: SendModalProps) {
   const [insufficientBalance, setInsufficientBalance] = useState(false);
 
   const isValidAddress = useAddressValidation(recipient);
-  const { baseFeeEstimate, feeEstimate, isLoadingEstimateFees } = useEstimateFees(selectedChainId, recipient, amount, address || "");
+  const { baseFeeEstimate, feeEstimate, isLoadingEstimateFees } =
+    useEstimateFees(selectedChainId, recipient, amount, address || "");
 
   useEffect(() => {
     if (cabBalance && baseFeeEstimate !== null) {
@@ -77,7 +78,9 @@ function SendModal({ open, onClose }: SendModalProps) {
   const handleSend = () => {
     if (!recipient || !amount || !selectedChainId) return;
 
-    const tokenAddress = tokenAddresses[selectedChainId as keyof typeof tokenAddresses]?.USDC as `0x${string}`;
+    const tokenAddress = tokenAddresses[
+      selectedChainId as keyof typeof tokenAddresses
+    ]?.USDC as `0x${string}`;
     if (!tokenAddress) {
       console.error("USDC address not found for the selected chain");
       return;
@@ -122,13 +125,13 @@ function SendModal({ open, onClose }: SendModalProps) {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             From
           </label>
-        <ChainSelect
-          selectedChainId={selectedChainId}
-          onChainSelect={(chainId) => {
-            setSelectedChainId(chainId);
-            setRecipient("");
-          }}
-        />
+          <ChainSelect
+            selectedChainId={selectedChainId}
+            onChainSelect={(chainId) => {
+              setSelectedChainId(chainId);
+              setRecipient("");
+            }}
+          />
         </div>
 
         <RecipientInput

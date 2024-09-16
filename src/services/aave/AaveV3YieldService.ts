@@ -1,5 +1,5 @@
 import { Address, PublicClient, getContract, formatUnits } from 'viem';
-import { getPublicClient } from '../uniswap/constants';
+import { getPublicClient } from '../../utils/constants';
 import { mcUSDC } from './utils';
 import { aaveV3PoolAbi } from './generated';
 import { polygon, arbitrum, optimism, base } from 'viem/chains';
