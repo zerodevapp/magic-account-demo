@@ -31,14 +31,15 @@ export async function getQuote(
         }) as [bigint, bigint, number, bigint];
         const [amountOut, , ,] = quoterResult;
 
-        return toReadableAmount(amountOut, tokenOut.decimals);
+        const amount = toReadableAmount(amountOut, tokenOut.decimals);
+        return amount;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-        return getQuote2(amountIn, tokenIn, tokenOut, chainId);
+        return getQuoteWithRoute(amountIn, tokenIn, tokenOut, chainId);
     }
 }
 
-export async function getQuote2(
+export async function getQuoteWithRoute(
     amountIn: string,
     tokenIn: Token,
     tokenOut: Token,
@@ -59,7 +60,8 @@ export async function getQuote2(
 
     try {
         const quote = await getOutputQuote(swapRoute, amountIn, tokenIn, chainId);
-        return toReadableAmount(quote, tokenOut.decimals);
+        const amount = toReadableAmount(quote, tokenOut.decimals);
+        return amount;
     } catch (error) {
         console.error(error);
         throw error;

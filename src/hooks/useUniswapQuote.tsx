@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { Token } from '@uniswap/sdk-core';
-import { getQuote } from '../services/uniswap/QuoteService';
+import { getQuoteWithRoute } from '../services/uniswap/QuoteService';
 import debounce from 'lodash/debounce';
 
 interface UseUniswapQuoteParams {
@@ -29,7 +29,7 @@ export function useUniswapQuote({
 
   return useQuery({
     queryKey: ['uniswapQuote', debouncedSellAmount, tokenIn.address, tokenOut.address, fee, chainId],
-    queryFn: () => getQuote(debouncedSellAmount, tokenIn, tokenOut, fee, chainId),
+    queryFn: () => getQuoteWithRoute(debouncedSellAmount, tokenIn, tokenOut, chainId),
     enabled: !!debouncedSellAmount && parseFloat(debouncedSellAmount) > 0,
   });
 }

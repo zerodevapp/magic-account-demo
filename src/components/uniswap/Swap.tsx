@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { ChevronDownIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
 import usdcLogo from "../../assets/usdc.png";
 import { Token } from "@uniswap/sdk-core";
@@ -18,8 +18,10 @@ import { useUniswapQuote } from "../../hooks/useUniswapQuote";
 import { toast } from "react-toastify";
 import { useTokenBalancesForChains } from "../../hooks/useTokenBalancesForChains";
 import { Button } from "@mui/material";
+import TransactionSuccessMessage from "../TransactionSuccessMessage";
 
 function Swap() {
+  const [isSellingUSDC, setIsSellingUSDC] = useState(true);
   const [sellAmount, setSellAmount] = useState<string>("");
   const { address, chainId: isConnected } = useAccount();
   const [selectedChainId, setSelectedChainId] = useState(Number(arbitrum.id));
@@ -41,20 +43,10 @@ function Swap() {
   const { swap, isLoading } = useSwap({
     onSuccess: (userOpHash: string) => {
       toast.success(
-        <div className="flex flex-col items-start space-y-2 text-sm">
-          <span className="font-semibold text-green-600">Swap successful!</span>
-          <div className="flex items-center space-x-2">
-            <span>View details:</span>
-            <a
-              href={`https://jiffyscan.xyz/userOpHash/${userOpHash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-full hover:bg-blue-200 transition-colors duration-200"
-            >
-              Transaction Details
-            </a>
-          </div>
-        </div>,
+        <TransactionSuccessMessage
+          userOpHash={userOpHash}
+          message="Swap successful"
+        />,
         {
           position: "bottom-right",
           autoClose: 15000,
@@ -81,10 +73,22 @@ function Swap() {
     };
   }, [selectedChainId, selectedToken]);
 
+  const handleSwapDirection = useCallback(() => {
+    setIsSellingUSDC(!isSellingUSDC);
+    setSellAmount("");
+  }, [isSellingUSDC]);
+
+  const sellToken = isSellingUSDC
+    ? tokens.USDC
+    : tokens[selectedToken as keyof typeof tokens];
+  const buyToken = isSellingUSDC
+    ? tokens[selectedToken as keyof typeof tokens]
+    : tokens.USDC;
+
   const { data: quoteAmount, isLoading: isQuoteLoading } = useUniswapQuote({
     sellAmount,
-    tokenIn: tokens.USDC,
-    tokenOut: tokens[selectedToken as keyof typeof tokens],
+    tokenIn: sellToken,
+    tokenOut: buyToken,
     fee: 500,
     chainId: selectedChainId,
   });
@@ -106,8 +110,8 @@ function Swap() {
 
     try {
       await swap({
-        sellToken: tokens.USDC,
-        buyToken: tokens[selectedToken as keyof typeof tokens],
+        sellToken,
+        buyToken,
         sellAmount,
         selectedChainId,
       });
@@ -116,6 +120,39 @@ function Swap() {
       // Show an error message to the user
     }
   };
+
+  const renderTokenButton = (isUSDC: boolean, onClick?: () => void) => (
+    <button
+      className={`flex items-center justify-between bg-white rounded-2xl py-2 px-3 ml-2 ${
+        isUSDC ? "" : "hover:bg-gray-50 cursor-pointer"
+      }`}
+      onClick={isUSDC ? undefined : onClick}
+      style={{ minWidth: "120px" }} // Add a minimum width
+    >
+      <div className="flex items-center">
+        <img
+          src={
+            isUSDC
+              ? usdcLogo
+              : tokenData.find((token) => token.symbol === selectedToken)?.logo
+          }
+          alt={isUSDC ? "USDC" : selectedToken}
+          className="h-6 w-6 mr-2 rounded-full"
+        />
+        <div className="flex flex-col items-start">
+          <span className="font-semibold text-sm">
+            {isUSDC ? "USDC" : selectedToken}
+          </span>
+          {!isUSDC && (
+            <span className="text-xs text-gray-500">
+              {getChainName(selectedChainId)}
+            </span>
+          )}
+        </div>
+      </div>
+      {!isUSDC && <ChevronDownIcon className="h-4 w-4 ml-2 flex-shrink-0" />}
+    </button>
+  );
 
   return (
     <div className="bg-white rounded-3xl shadow-lg p-4 w-full">
@@ -130,10 +167,20 @@ function Swap() {
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-gray-500">Sell</span>
             <span className="text-sm text-gray-500">
-              Balance: $
-              {cabBalance
-                ? Number(formatUnits(cabBalance, 6)).toFixed(2)
-                : "0.00"}
+              Balance:{" "}
+              {isSellingUSDC
+                ? `$${
+                    cabBalance
+                      ? Number(formatUnits(cabBalance, 6)).toFixed(2)
+                      : "0.00"
+                  }`
+                : isBalanceLoading
+                ? "Loading..."
+                : balanceError
+                ? "Error fetching balance"
+                : `${parseFloat(swapTokenBalance || "0").toFixed(
+                    6
+                  )} ${selectedToken}`}
             </span>
           </div>
           <div className="flex items-center">
@@ -156,11 +203,10 @@ function Swap() {
                 boxShadow: "none",
               }}
             />
-            <button className="flex items-center bg-white rounded-2xl py-2 px-3 ml-2 hover:bg-gray-50">
-              <img src={usdcLogo} alt="USDC" className="h-6 w-6 mr-2" />
-              <span className="font-semibold">USDC</span>
-              <ChevronDownIcon className="h-4 w-4 ml-2" />
-            </button>
+            {renderTokenButton(
+              isSellingUSDC,
+              isSellingUSDC ? undefined : () => setIsTokenSelectOpen(true)
+            )}
           </div>
           {sellAmount && (
             <div className="text-sm text-gray-500 mt-1">
@@ -170,16 +216,26 @@ function Swap() {
         </div>
 
         <div className="absolute left-1/2 top-[45%] -translate-x-1/2 -translate-y-1/2 z-5">
-          <button className="bg-white p-2 rounded-full hover:bg-gray-100 shadow-md">
+          <button
+            className="bg-white p-2 rounded-full hover:bg-gray-100 shadow-md"
+            onClick={handleSwapDirection}
+          >
             <ArrowDownIcon className="h-6 w-6 text-blue-500" />
           </button>
         </div>
+
         <div className="bg-gray-100 rounded-2xl p-4 mt-1">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-gray-500">Buy</span>
             <span className="text-sm text-gray-500">
               Balance:{" "}
-              {isBalanceLoading
+              {!isSellingUSDC
+                ? `$${
+                    cabBalance
+                      ? Number(formatUnits(cabBalance, 6)).toFixed(2)
+                      : "0.00"
+                  }`
+                : isBalanceLoading
                 ? "Loading..."
                 : balanceError
                 ? "Error fetching balance"
@@ -203,28 +259,10 @@ function Swap() {
                 boxShadow: "none",
               }}
             />
-            <button
-              className="flex items-center cursor-pointer bg-white rounded-2xl py-2 px-3 hover:bg-gray-200 min-w-[140px] justify-between"
-              onClick={() => setIsTokenSelectOpen(true)}
-            >
-              <div className="flex items-center">
-                <img
-                  src={
-                    tokenData.find((token) => token.symbol === selectedToken)
-                      ?.logo
-                  }
-                  alt={selectedToken}
-                  className="h-6 w-6 mr-2 rounded-full"
-                />
-                <div className="flex flex-col items-start">
-                  <span className="font-semibold text-sm">{selectedToken}</span>
-                  <span className="text-xs text-gray-500">
-                    {getChainName(selectedChainId)}
-                  </span>
-                </div>
-              </div>
-              <ChevronDownIcon className="h-4 w-4 ml-2" />
-            </button>
+            {renderTokenButton(
+              !isSellingUSDC,
+              !isSellingUSDC ? undefined : () => setIsTokenSelectOpen(true)
+            )}
           </div>
         </div>
       </div>

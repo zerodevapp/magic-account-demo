@@ -14,6 +14,7 @@ import {
 import { Button, CircularProgress } from "@mui/material";
 import { toast } from "react-toastify";
 import { useAccount } from "wagmi";
+import TransactionSuccessMessage from "../TransactionSuccessMessage";
 
 interface SendModalProps {
   open: boolean;
@@ -249,20 +250,10 @@ function SendModal({ open, onClose }: SendModalProps) {
     onSuccess: (userOpHash) => {
       console.log("Token sent successfully, userOpHash:", userOpHash);
       toast.success(
-        <div className="flex flex-col items-start space-y-2 text-sm">
-          <span className="font-semibold text-green-600">Send successful!</span>
-          <div className="flex items-center space-x-2">
-            <span>View details:</span>
-            <a
-              href={`https://jiffyscan.xyz/userOpHash/${userOpHash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded-full hover:bg-blue-200 transition-colors duration-200"
-            >
-              Transaction Details
-            </a>
-          </div>
-        </div>,
+        <TransactionSuccessMessage
+          message="Send successful!"
+          userOpHash={userOpHash}
+        />,
         {
           position: "bottom-right",
           autoClose: 15000,
