@@ -21,6 +21,7 @@ interface SendModalProps {
 }
 
 function SendModal({ open, onClose }: SendModalProps) {
+  const [shouldEstimateFees, setShouldEstimateFees] = useState(true);
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const { data: cabBalance } = useReadCab({ refetchInterval: 1000 });
@@ -110,12 +111,14 @@ function SendModal({ open, onClose }: SendModalProps) {
 
   // Estimate transaction fees based on user inputs
   const estimateTransactionFees = useCallback(async () => {
+    debugger;
     if (
       !recipient ||
       !amount ||
       !selectedChainId ||
       !isAddress(recipient) ||
-      parseFloat(amount) <= 0
+      parseFloat(amount) <= 0 ||
+      !shouldEstimateFees
     ) {
       setFeeEstimate(null);
       setInsufficientBalance(false);
@@ -152,7 +155,10 @@ function SendModal({ open, onClose }: SendModalProps) {
         data: encodeFunctionData({
           abi: erc20Abi,
           functionName: "transfer",
-          args: [recipient as `0x${string}`, parseUnits(amount, tokenDecimals.USDC)],
+          args: [
+            recipient as `0x${string}`,
+            parseUnits(amount, tokenDecimals.USDC),
+          ],
         }),
         value: 0n,
       };
@@ -166,6 +172,7 @@ function SendModal({ open, onClose }: SendModalProps) {
       setIsLoadingEstimateFees(false);
 
       if (result.error) {
+        setInsufficientBalance(true);
         setFeeEstimate(null);
         console.error("Error estimating fees:", result.error);
         return;
@@ -195,6 +202,7 @@ function SendModal({ open, onClose }: SendModalProps) {
     cabBalance,
     maxAmount,
     baseFeeEstimate,
+    shouldEstimateFees,
   ]);
 
   // Re-estimate base fee when modal opens or chain changes
@@ -206,8 +214,10 @@ function SendModal({ open, onClose }: SendModalProps) {
 
   // Re-estimate transaction fees when relevant inputs change
   useEffect(() => {
-    estimateTransactionFees();
-  }, [estimateTransactionFees]);
+    if (shouldEstimateFees) {
+      estimateTransactionFees();
+    }
+  }, [estimateTransactionFees, shouldEstimateFees]);
 
   const debouncedSetAmount = useCallback(
     debounce((value: string) => {
@@ -260,6 +270,7 @@ function SendModal({ open, onClose }: SendModalProps) {
         }
       );
       setAmount("");
+      setInputValue("");
       setRecipient("");
       onClose();
     },
@@ -267,6 +278,8 @@ function SendModal({ open, onClose }: SendModalProps) {
 
   const handleSend = () => {
     if (!recipient || !amount || !selectedChainId) return;
+
+    setShouldEstimateFees(false);
 
     const tokenAddress = tokenAddresses[
       selectedChainId as keyof typeof tokenAddresses
@@ -284,6 +297,12 @@ function SendModal({ open, onClose }: SendModalProps) {
       decimals: tokenDecimals.USDC,
     });
   };
+
+  useEffect(() => {
+    if (!open) {
+      setShouldEstimateFees(true);
+    }
+  }, [open]);
 
   return (
     <Modal open={open} handleClose={onClose} showPoweredBy={false}>
@@ -388,15 +407,15 @@ function SendModal({ open, onClose }: SendModalProps) {
               </button>
             </div>
           </div>
-          {insufficientBalance && (
+          {insufficientBalance && shouldEstimateFees && (
             <p className="mt-1 text-sm text-red-600">Insufficient balance.</p>
           )}
-          {feeEstimate && !isLoadingEstimateFees && (
+          {feeEstimate && !isLoadingEstimateFees && shouldEstimateFees && (
             <p className="mt-1 text-sm text-gray-600">
               Estimated fee: ${feeEstimate} USDC
             </p>
           )}
-          {isLoadingEstimateFees && (
+          {isLoadingEstimateFees && shouldEstimateFees && (
             <p className="mt-1 text-sm text-gray-600">Estimating fee...</p>
           )}
         </div>
