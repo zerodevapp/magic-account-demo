@@ -111,7 +111,6 @@ function SendModal({ open, onClose }: SendModalProps) {
 
   // Estimate transaction fees based on user inputs
   const estimateTransactionFees = useCallback(async () => {
-    debugger;
     if (
       !recipient ||
       !amount ||
