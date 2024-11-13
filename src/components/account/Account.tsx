@@ -35,8 +35,9 @@ const QRCodeTooltip: React.FC<QRCodeTooltipProps> = ({ address }) => {
 function Account() {
   const { address, isConnected } = useAccount();
   const { isEnabledOnCurrentChain } = useEnableCab();
-  const { isEnablingCab } = useAutoEnableCab();
+  const { isEnablingCab, isEnabled } = useAutoEnableCab();
 
+  console.log('isEnabledOnCurrentChain', isEnabledOnCurrentChain('USDC'))
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
   const copyAddress = () => {
@@ -49,6 +50,12 @@ function Account() {
     if (!addr) return "";
     return `${addr.slice(0, 8)}...${addr.slice(-6)}`;
   };
+  
+  const getEnabledState = (isEnabled: boolean, isEnablingCab: boolean, isEnabledOnCurrentChain: boolean) => {
+    if (isEnabledOnCurrentChain) return "Yes";
+    if (isEnablingCab || isEnabled) return "Enabling...";
+    return "No";
+  }
 
   const displayAddress = address || "";
 
@@ -107,11 +114,12 @@ function Account() {
                     : "text-red-600"
                 }`}
               >
-                {isEnablingCab
+                {getEnabledState(isEnabled, isEnablingCab, isEnabledOnCurrentChain("USDC"))}
+                {/* {isEnablingCab
                   ? "Enabling..."
                   : isEnabledOnCurrentChain("USDC")
                   ? "Yes"
-                  : "No"}
+                  : "No"} */}
               </span>
             </dd>
           </div>
